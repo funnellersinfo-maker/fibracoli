@@ -5,14 +5,15 @@ import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import {
   MessageCircle, Truck, ShieldCheck, Leaf, Sparkles, ChevronDown, Star,
   CheckCircle2, ArrowRight, Phone, Heart, Clock, CreditCard, Banknote,
-  Wallet, Building2, Smartphone, Award, BadgeCheck, Flame, Users, TrendingUp
+  Wallet, Building2, Smartphone, Award, BadgeCheck, Flame, Users, TrendingUp,
+  Gift, Zap
 } from 'lucide-react'
 
 /* ─────────────────────────────────────────────
    CONSTANTS — FULL PRODUCT DATA
    ───────────────────────────────────────────── */
 const WHATSAPP_NUMBER = '573001234567'
-const WHATSAPP_MESSAGE = encodeURIComponent('Hola! Quiero aprovechar la promo Paga 2 Lleva 3 de ColiPlus 💚')
+const WHATSAPP_MESSAGE = encodeURIComponent('Hola! Quiero aprovechar la promo Paga 2 Lleva 3 de ColiPlus + Loción Termoactiva GRATIS 💚')
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`
 
 const ALL_INGREDIENTS = [
@@ -222,6 +223,13 @@ export default function Home() {
               </GlowButton>
               <span className="text-white/20 text-xs">Envío gratis · Pago contra entrega · Nequi · Bancolombia · PSE</span>
             </motion.div>
+
+            {/* Gift badge */}
+            <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 1.2 }} className="mt-3 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06]">
+              <Gift className="w-4 h-4 text-amber-400" />
+              <span className="text-amber-300/90 text-xs md:text-sm font-semibold">Loción Termoactiva GRATIS con tu compra</span>
+              <Sparkles className="w-3 h-3 text-amber-400/60" />
+            </motion.div>
           </div>
 
           <motion.div style={{ opacity: productOpacity }} className="relative flex-shrink-0">
@@ -301,6 +309,7 @@ function SocialProofBar() {
           { value: '5.000+', label: 'Clientes satisfechos', icon: Users },
           { value: '4.8/5', label: 'Calificación promedio', icon: Star },
           { value: '#1', label: 'Más vendido Colombia', icon: TrendingUp },
+          { value: 'GRATIS', label: 'Obsequio incluido', icon: Gift },
           { value: 'INVIMA', label: 'Registro sanitario', icon: Award },
         ].map((stat, i) => (
           <div key={i} className="flex items-center gap-2.5">
@@ -488,8 +497,48 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
           </div>
         </motion.div>
 
+        {/* 🎁 OBSEQUIO DESTACADO */}
+        <motion.div initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}} transition={{ duration: 0.7, delay: 0.45 }} className="mt-8 md:mt-10 relative">
+          <div className="absolute inset-0 bg-amber-500/[0.04] rounded-3xl blur-[40px] pointer-events-none" />
+          <div className="relative bg-gradient-to-br from-amber-500/[0.08] via-amber-400/[0.04] to-transparent border border-amber-500/20 rounded-3xl p-5 md:p-7 overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-amber-400/[0.06] rounded-full blur-[50px] pointer-events-none" />
+            <div className="flex flex-col md:flex-row items-center gap-5 md:gap-8">
+              <div className="relative flex-shrink-0">
+                <div className="absolute inset-0 rounded-2xl bg-amber-400/10 blur-[20px]" />
+                <img src="/images/termoactiva-product.jpg" alt="Loción Termoactiva Allpa Natural - Obsequio gratis" className="relative w-28 h-28 md:w-36 md:h-36 object-cover rounded-2xl border border-amber-500/20 shadow-[0_0_30px_rgba(245,158,11,0.15)]" loading="lazy" />
+                <div className="absolute -top-2 -right-2 w-8 h-8 bg-amber-500 rounded-full flex items-center justify-center shadow-lg">
+                  <Gift className="w-4 h-4 text-black" />
+                </div>
+              </div>
+              <div className="text-center md:text-left flex-1">
+                <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/15 border border-amber-500/25 mb-3">
+                  <Gift className="w-3.5 h-3.5 text-amber-400" />
+                  <span className="text-amber-300 text-[11px] font-bold tracking-[0.2em] uppercase">Obsequio exclusivo</span>
+                </div>
+                <h3 className="text-xl md:text-2xl font-extrabold text-white mb-1.5">
+                  Loción Termoactiva <span className="text-amber-400">Allpa Natural</span>
+                </h3>
+                <p className="text-white/50 text-sm leading-relaxed mb-3 max-w-md">
+                  Analgésico y antiinflamatorio tópico con <span className="text-white/70 font-medium">Árnica, Castaño de Indias, Caléndula, Hamamelis, Uña de Gato y Chuchuhuasi</span>. Alivia dolores musculares, torceduras, calambres y contracturas. 18ml.
+                </p>
+                <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
+                  {['Torceduras', 'Esguinces', 'Calambres', 'Contracturas', 'Tortícolis'].map((use, i) => (
+                    <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-500/[0.08] border border-amber-500/15 rounded-full text-amber-300/80 text-[10px] font-medium">
+                      <Zap className="w-2.5 h-2.5" />{use}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              <div className="flex-shrink-0 text-center">
+                <div className="text-3xl md:text-4xl font-black text-amber-400">GRATIS</div>
+                <p className="text-white/30 text-[10px] mt-1">Valor: $25.000 COP</p>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Trust badges */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.5 }} className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.6 }} className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
           {[
             { icon: Truck, label: 'Envío Gratis', sub: 'A toda Colombia' },
             { icon: ShieldCheck, label: 'Pago Contra Entrega', sub: 'Pagas al recibir' },
@@ -502,11 +551,11 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
           ))}
         </motion.div>
 
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.7 }} className="mt-10 md:mt-14 flex flex-col items-center gap-3">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.8 }} className="mt-10 md:mt-14 flex flex-col items-center gap-3">
           <GlowButton onClick={openWhatsApp} className="shadow-[0_0_50px_rgba(57,255,20,0.15)]">
-            <MessageCircle className="w-5 h-5" /> Quiero mi promo 2x3 <ArrowRight className="w-4 h-4" />
+            <MessageCircle className="w-5 h-5" /> Quiero mi promo 2x3 + Obsequio <ArrowRight className="w-4 h-4" />
           </GlowButton>
-          <span className="text-white/20 text-xs">Sin pagos por adelantado · Recibe primero, paga después</span>
+          <span className="text-white/20 text-xs">Sin pagos por adelantado · Recibe primero, paga después · Loción Termoactiva GRATIS</span>
         </motion.div>
       </div>
     </section>
@@ -616,6 +665,16 @@ function FinalCTASection({ openWhatsApp }: { openWhatsApp: () => void }) {
         <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.2 }} className="text-white/40 text-base md:text-lg max-w-xl mx-auto mb-4">
           No esperes un día más para sentirte bien. Paga 2 y llévate 3 tarros de ColiPlus con envío gratis a toda Colombia.
         </motion.p>
+
+        {/* Gift reminder in CTA */}
+        <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={inView ? { opacity: 1, scale: 1 } : {}} transition={{ duration: 0.5, delay: 0.25 }} className="mb-6 inline-flex items-center gap-3 px-5 py-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06]">
+          <img src="/images/termoactiva-product.jpg" alt="Loción Termoactiva obsequio" className="w-10 h-10 rounded-lg object-cover border border-amber-500/20" loading="lazy" />
+          <div className="text-left">
+            <p className="text-amber-300 text-sm font-bold">+ Loción Termoactiva GRATIS</p>
+            <p className="text-white/30 text-[10px]">Árnica · Caléndula · Chuchuhuasi · 18ml</p>
+          </div>
+          <Gift className="w-5 h-5 text-amber-400 ml-1" />
+        </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.3 }} className="mb-8">
           <span className="text-2xl md:text-4xl font-black bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">$151.800</span>
           <span className="text-white/30 text-sm ml-2">COP · 3 tarros de 450g</span>
