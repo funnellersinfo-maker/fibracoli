@@ -4,25 +4,60 @@ import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, useScroll, useTransform, AnimatePresence } from 'framer-motion'
 import {
   MessageCircle, Truck, ShieldCheck, Leaf, Sparkles, ChevronDown, Star,
-  CheckCircle2, ArrowRight, Phone, Heart, Clock, CreditCard, Banknote,
+  CheckCircle2, ArrowRight, Heart, Clock, CreditCard, Banknote,
   Wallet, Building2, Smartphone, Award, BadgeCheck, Flame, Users, TrendingUp,
-  Gift, Zap, Volume2, VolumeX, RotateCcw, Play
+  Gift, Zap, Volume2, VolumeX, RotateCcw, Play, ChevronUp
 } from 'lucide-react'
 
 /* ─────────────────────────────────────────────
-   CONSTANTS — FULL PRODUCT DATA
+   CONSTANTS
    ───────────────────────────────────────────── */
 const WHATSAPP_NUMBER = '573214487903'
-const WHATSAPP_MESSAGE = encodeURIComponent('Hola! Quiero aprovechar la promo Paga 2 Lleva 3 de ColiPlus + Loción Termoactiva GRATIS 💚')
-const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`
 const WHATSAPP_GENERIC_MSG = encodeURIComponent('Hola! Quiero información sobre ColiPlus 💚')
 const WHATSAPP_GENERIC_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_GENERIC_MSG}`
 
-const PRICING_TIERS = [
-  { qty: '1 Unidad', price: '$75.900', unit: '$75.900 c/u', highlight: false, msg: encodeURIComponent('Hola! Quiero comprar 1 Unidad de ColiPlus $75.900 💚') },
-  { qty: '2 Unidades', price: '$113.850', unit: '$56.925 c/u', highlight: false, savings: 'Ahorra 25%', msg: encodeURIComponent('Hola! Quiero comprar 2 Unidades de ColiPlus $113.850 💚') },
-  { qty: 'Paga 2 Lleva 3', price: '$151.800', unit: '$50.600 c/u', highlight: true, savings: 'Más popular', msg: encodeURIComponent('Hola! Quiero aprovechar la promo Paga 2 Lleva 3 de ColiPlus $151.800 + Loción Termoactiva GRATIS 💚') },
-  { qty: 'Paga 3 Lleva 5', price: '$227.700', unit: '$45.540 c/u', highlight: false, savings: 'Mejor precio', msg: encodeURIComponent('Hola! Quiero aprovechar la promo Paga 3 Lleva 5 de ColiPlus $227.700 + Loción Termoactiva GRATIS 💚') },
+const KITS = [
+  {
+    id: 'basico',
+    name: 'Kit Básico',
+    qty: '1 Tarro',
+    price: '$75.900',
+    unitPrice: '$75.900 c/u',
+    highlight: false,
+    tag: null,
+    msg: encodeURIComponent('Hola! Quiero comprar 1 Tarro de ColiPlus $75.900 💚'),
+  },
+  {
+    id: 'duplo',
+    name: 'Kit Recomendado',
+    qty: '2 Tarros',
+    price: '$113.850',
+    unitPrice: '$56.925 c/u',
+    highlight: true,
+    tag: 'Más Vendido',
+    savings: 'Ahorra 25%',
+    msg: encodeURIComponent('Hola! Quiero el Kit Recomendado de 2 Tarros de ColiPlus $113.850 + Loción GRATIS 💚'),
+  },
+  {
+    id: 'familiar',
+    name: 'Kit Familiar',
+    qty: '3 Tarros',
+    price: '$151.800',
+    unitPrice: '$50.600 c/u',
+    highlight: false,
+    tag: 'Mejor Precio',
+    savings: 'Ahorra 33%',
+    msg: encodeURIComponent('Hola! Quiero el Kit Familiar de 3 Tarros de ColiPlus $151.800 + Loción GRATIS 💚'),
+  },
+]
+
+const PAIN_POINTS = [
+  { icon: '😣', text: 'Abdomen abultado e hinchado al final del día' },
+  { icon: '😫', text: 'Pesadez extrema después de cada comida' },
+  { icon: '😩', text: 'Días enteros sin poder ir al baño' },
+  { icon: '😤', text: 'Gases y molestias que no te dejan en paz' },
+  { icon: '🥱', text: 'Sin energía, siempre cansado y pesado' },
+  { icon: '😰', text: 'Ropa que ya no te queda por la inflamación' },
 ]
 
 const ALL_INGREDIENTS = [
@@ -38,30 +73,9 @@ const ALL_INGREDIENTS = [
 ]
 
 const INGREDIENTS = [
-  {
-    id: 'noni',
-    name: 'Noni',
-    subtitle: 'Desintoxicación Natural',
-    description: 'Poderoso antioxidante que purifica tu organismo desde adentro. Elimina toxinas, fortalece tu sistema inmunológico y combate la inflamación crónica.',
-    icon: '/noni-icon.webp',
-    benefits: ['Purifica el organismo', 'Fortalece defensas', 'Combate inflamación', 'Elimina toxinas'],
-  },
-  {
-    id: 'linaza',
-    name: 'Linaza',
-    subtitle: 'Fibra Digestiva Premium',
-    description: 'Rica en omega-3 y fibra soluble que regula tu tránsito intestinal, reduce la hinchazón abdominal y te ayuda a sentirte ligero cada día.',
-    icon: '/linaza-icon.webp',
-    benefits: ['Regula tránsito intestinal', 'Reduce hinchazón', 'Omega-3 natural', 'Mejora absorción'],
-  },
-  {
-    id: 'espirulina',
-    name: 'Espirulina',
-    subtitle: 'Superfood Energizante',
-    description: 'El superalimento más completo del planeta. Cargado de proteínas, vitaminas del complejo B y minerales esenciales que revitalizan tu cuerpo entero.',
-    icon: '/espirulina-icon.webp',
-    benefits: ['Energía sostenida', 'Proteína completa', 'Repara tejidos', 'Equilibra flora intestinal'],
-  },
+  { id: 'noni', name: 'Noni', subtitle: 'Desintoxicación Natural', description: 'Poderoso antioxidante que purifica tu organismo desde adentro. Elimina toxinas, fortalece tu sistema inmunológico y combate la inflamación crónica.', icon: '/noni-icon.webp', benefits: ['Purifica el organismo', 'Fortalece defensas', 'Combate inflamación', 'Elimina toxinas'] },
+  { id: 'linaza', name: 'Linaza', subtitle: 'Fibra Digestiva Premium', description: 'Rica en omega-3 y fibra soluble que regula tu tránsito intestinal, reduce la hinchazón abdominal y te ayuda a sentirte ligero cada día.', icon: '/linaza-icon.webp', benefits: ['Regula tránsito intestinal', 'Reduce hinchazón', 'Omega-3 natural', 'Mejora absorción'] },
+  { id: 'espirulina', name: 'Espirulina', subtitle: 'Superfood Energizante', description: 'El superalimento más completo del planeta. Cargado de proteínas, vitaminas del complejo B y minerales esenciales que revitalizan tu cuerpo entero.', icon: '/espirulina-icon.webp', benefits: ['Energía sostenida', 'Proteína completa', 'Repara tejidos', 'Equilibra flora intestinal'] },
 ]
 
 const PAYMENT_METHODS = [
@@ -71,6 +85,15 @@ const PAYMENT_METHODS = [
   { icon: Building2, label: 'PSE · Bancolombia', desc: 'Transferencia segura' },
   { icon: Wallet, label: 'Bre-B', desc: 'Pago digital seguro' },
   { icon: Banknote, label: 'Efecty · Baloto', desc: 'Pago en efectivo' },
+]
+
+const FAQ_ITEMS = [
+  { q: '¿Cómo se toma ColiPlus?', a: 'Mezcla 1 cucharada (18g) en un vaso de agua o jugo. Sabor delicioso a manzana verde, sin azúcar añadida. Tómalo en ayunas o antes de dormir para mejores resultados.' },
+  { q: '¿Cuánto tiempo tarda en hacer efecto?', a: 'La mayoría de clientes sienten la diferencia en los primeros 7-14 días: menos inflamación, mejor tránsito intestinal y más energía. Los resultados se potencian con el uso continuo.' },
+  { q: '¿Tiene efectos secundarios o contraindicaciones?', a: 'ColiPlus es 100% natural, con Registro INVIMA. No contiene laxantes agresivos ni químicos. Es sin gluten, sin lactosa y vegano. Si tienes condiciones médicas preexistentes, consulta a tu médico.' },
+  { q: '¿Cómo funciona el pago contra entrega?', a: 'Pides por WhatsApp, recibes el producto en la puerta de tu casa y pagas al momento de la entrega. Sin pagos por adelantado, sin riesgo. También puedes pagar con Nequi, PSE, Bancolombia, tarjeta o Efecty.' },
+  { q: '¿Cuánto tarda el envío?', a: 'Envío gratis a toda Colombia. Llega entre 2-5 días hábiles dependiendo de tu ciudad. Te enviamos el número de guía para que puedas rastrear tu pedido en todo momento.' },
+  { q: '¿Qué es la Loción Termoactiva que incluyen gratis?', a: 'Es un obsequio exclusivo de ColiPlus: Loción Termoactiva Allpa Natural (18ml). Analgésico y antiinflamatorio tópico con Árnica, Castaño de Indias y Caléndula. Ideal para dolores musculares, calambres y contracturas.' },
 ]
 
 /* ─────────────────────────────────────────────
@@ -118,12 +141,10 @@ function FloatingProduct({ scrollProgress }: { scrollProgress: number }) {
   const scale = isMobile ? 1 - scrollProgress * 0.35 : 1 - scrollProgress * 0.25
   const opacity = Math.max(1 - scrollProgress * 1.5, 0)
   return (
-    <motion.div id="producto-interactivo" className="pointer-events-none select-none relative" style={{ x, scale: Math.max(scale, 0.3), opacity }} animate={{ y: [0, -14, 0] }} transition={{ y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' }, x: { duration: 0 }, scale: { duration: 0 }, opacity: { duration: 0 } }}>
+    <motion.div className="pointer-events-none select-none relative" style={{ x, scale: Math.max(scale, 0.3), opacity }} animate={{ y: [0, -14, 0] }} transition={{ y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' }, x: { duration: 0 }, scale: { duration: 0 }, opacity: { duration: 0 } }}>
       <div className="absolute inset-0 rounded-full bg-[#39FF14]/5 blur-[60px] scale-150" />
       <div className="absolute inset-0 rounded-full bg-[#39FF14]/10 blur-[30px] scale-125" />
-      <div className="absolute inset-[-20px] rounded-full border border-[#39FF14]/10 animate-[spin_20s_linear_infinite]" />
-      <div className="absolute inset-[-40px] rounded-full border border-dashed border-[#39FF14]/5 animate-[spin_30s_linear_infinite_reverse]" />
-      <img src="/coliplus.webp" alt="ColiPlus - Suplemento natural con Noni, Linaza, Espirulina, Alcachofa, Pitaya y más" className="relative z-10 w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[340px] md:h-[340px] lg:w-[400px] lg:h-[400px] object-contain drop-shadow-[0_0_60px_rgba(57,255,20,0.25)]" loading="eager" />
+      <img src="/coliplus.webp" alt="ColiPlus - Suplemento natural para desintoxicar el colon" className="relative z-10 w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[340px] md:h-[340px] lg:w-[400px] lg:h-[400px] object-contain drop-shadow-[0_0_60px_rgba(57,255,20,0.25)]" loading="eager" />
     </motion.div>
   )
 }
@@ -136,7 +157,7 @@ function IngredientCard({ ingredient, index }: { ingredient: typeof INGREDIENTS[
       <div className="absolute inset-0 rounded-3xl bg-[#39FF14]/[0.02] opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <div className="relative w-20 h-20 md:w-24 md:h-24 mx-auto mb-6">
         <div className="absolute inset-0 rounded-full bg-[#39FF14]/5 group-hover:bg-[#39FF14]/10 transition-colors duration-500" />
-        <img src={ingredient.icon} alt={ingredient.name} className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_20px_rgba(57,255,20,0.25)] group-hover:drop-shadow-[0_0_30px_rgba(57,255,20,0.4)] transition-all duration-500" loading="lazy" />
+        <img src={ingredient.icon} alt={ingredient.name} className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_20px_rgba(57,255,20,0.25)]" loading="lazy" />
       </div>
       <div className="text-center relative z-10">
         <span className="text-[#39FF14] text-[11px] font-bold tracking-[0.25em] uppercase">{ingredient.subtitle}</span>
@@ -154,13 +175,14 @@ function IngredientCard({ ingredient, index }: { ingredient: typeof INGREDIENTS[
   )
 }
 
-function GlowButton({ children, onClick, className = '', size = 'lg' }: { children: React.ReactNode; onClick?: () => void; className?: string; size?: 'md' | 'lg' }) {
+function GlowButton({ children, href, onClick, className = '', size = 'lg' }: { children: React.ReactNode; href?: string; onClick?: () => void; className?: string; size?: 'md' | 'lg' }) {
+  const Tag = href ? 'a' : 'button'
   return (
-    <motion.button onClick={onClick} className={`relative inline-flex items-center justify-center gap-2.5 font-bold rounded-full bg-gradient-to-r from-[#39FF14] to-[#2bcc10] text-black overflow-hidden group cursor-pointer ${size === 'lg' ? 'px-8 py-4 text-base md:text-lg' : 'px-6 py-3 text-sm md:text-base'} ${className}`} whileHover={{ scale: 1.05, boxShadow: '0 0 50px rgba(57,255,20,0.3)' }} whileTap={{ scale: 0.97 }} transition={{ type: 'spring', stiffness: 400, damping: 17 }}>
+    <Tag href={href} onClick={onClick} target={href ? '_blank' : undefined} rel={href ? 'noopener noreferrer' : undefined} className={`relative inline-flex items-center justify-center gap-2.5 font-bold rounded-full bg-gradient-to-r from-[#39FF14] to-[#2bcc10] text-black overflow-hidden group cursor-pointer ${size === 'lg' ? 'px-8 py-4 text-base md:text-lg' : 'px-6 py-3 text-sm md:text-base'} ${className}`} style={{ minHeight: size === 'lg' ? '56px' : '44px' }}>
       <span className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12" />
       <span className="absolute -inset-1 bg-[#39FF14]/25 rounded-full blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
       <span className="relative z-10 flex items-center gap-2.5">{children}</span>
-    </motion.button>
+    </Tag>
   )
 }
 
@@ -178,27 +200,13 @@ function FloatingWhatsApp() {
 }
 
 function SectionDivider() {
-  return (<div className="w-full flex items-center justify-center py-8 md:py-12"><div className="h-px w-24 md:w-36 bg-gradient-to-r from-transparent via-[#39FF14]/30 to-transparent" /><div className="mx-3 w-1.5 h-1.5 rounded-full bg-[#39FF14]/40" /><div className="h-px w-24 md:w-36 bg-gradient-to-r from-transparent via-[#39FF14]/30 to-transparent" /></div>)
+  return (<div className="w-full flex items-center justify-center py-8 md:py-10"><div className="h-px w-24 md:w-36 bg-gradient-to-r from-transparent via-[#39FF14]/30 to-transparent" /><div className="mx-3 w-1.5 h-1.5 rounded-full bg-[#39FF14]/40" /><div className="h-px w-24 md:w-36 bg-gradient-to-r from-transparent via-[#39FF14]/30 to-transparent" /></div>)
 }
 
 /* ─────────────────────────────────────────────
    REUSABLE VIDEO PLAYER
    ───────────────────────────────────────────── */
-function VideoPlayer({
-  src,
-  label,
-  heading,
-  headingHighlight,
-  accent = 'green',
-  variant = 'default',
-}: {
-  src: string
-  label: string
-  heading: string
-  headingHighlight: string
-  accent?: 'green' | 'warm'
-  variant?: 'default' | 'personal'
-}) {
+function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', variant = 'default' }: { src: string; label: string; heading: string; headingHighlight: string; accent?: 'green' | 'warm'; variant?: 'default' | 'personal' }) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isMuted, setIsMuted] = useState(true)
@@ -207,56 +215,19 @@ function VideoPlayer({
   const [isPlaying, setIsPlaying] = useState(false)
   const [hasAutoPlayed, setHasAutoPlayed] = useState(false)
 
-  // Autoplay when in viewport (IntersectionObserver)
   useEffect(() => {
-    const vid = videoRef.current
-    const el = containerRef.current
+    const vid = videoRef.current; const el = containerRef.current
     if (!vid || !el) return
     const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !hasAutoPlayed) {
-        setHasAutoPlayed(true)
-        vid.muted = true
-        vid.playsInline = true
-        vid.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
-        obs.disconnect()
-      }
+      if (entry.isIntersecting && !hasAutoPlayed) { setHasAutoPlayed(true); vid.muted = true; vid.playsInline = true; vid.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false)); obs.disconnect() }
     }, { threshold: 0.3 })
-    obs.observe(el)
-    return () => obs.disconnect()
+    obs.observe(el); return () => obs.disconnect()
   }, [hasAutoPlayed])
 
-  // Activate sound: restart from 0 with audio
-  const activateSound = useCallback(() => {
-    const vid = videoRef.current
-    if (!vid) return
-    vid.muted = false
-    vid.currentTime = 0
-    vid.play().then(() => {
-      setIsMuted(false)
-      setShowSoundBtn(false)
-      setIsEnded(false)
-      setIsPlaying(true)
-    }).catch(() => { vid.muted = true; setIsMuted(true) })
-  }, [])
-
-  // Replay
-  const handleReplay = useCallback(() => {
-    const vid = videoRef.current
-    if (!vid) return
-    vid.currentTime = 0
-    vid.play().then(() => { setIsEnded(false); setIsPlaying(true) }).catch(() => {})
-  }, [])
-
-  // Video ended
+  const activateSound = useCallback(() => { const vid = videoRef.current; if (!vid) return; vid.muted = false; vid.currentTime = 0; vid.play().then(() => { setIsMuted(false); setShowSoundBtn(false); setIsEnded(false); setIsPlaying(true) }).catch(() => { vid.muted = true; setIsMuted(true) }) }, [])
+  const handleReplay = useCallback(() => { const vid = videoRef.current; if (!vid) return; vid.currentTime = 0; vid.play().then(() => { setIsEnded(false); setIsPlaying(true) }).catch(() => {}) }, [])
   const handleEnded = useCallback(() => { setIsEnded(true); setIsPlaying(false) }, [])
-
-  // Pause/Play toggle
-  const togglePlayPause = useCallback(() => {
-    const vid = videoRef.current
-    if (!vid) return
-    if (vid.paused) { vid.play().then(() => setIsPlaying(true)).catch(() => {}) }
-    else { vid.pause(); setIsPlaying(false) }
-  }, [])
+  const togglePlayPause = useCallback(() => { const vid = videoRef.current; if (!vid) return; if (vid.paused) { vid.play().then(() => setIsPlaying(true)).catch(() => {}) } else { vid.pause(); setIsPlaying(false) } }, [])
 
   const isWarm = accent === 'warm'
   const isPersonal = variant === 'personal'
@@ -266,197 +237,67 @@ function VideoPlayer({
   const glowShadow = isWarm ? 'rgba(245,158,11,' : 'rgba(57,255,20,'
 
   return (
-    <section ref={containerRef} className={`relative py-12 md:py-20 px-4 ${isPersonal ? 'overflow-hidden' : ''}`}>
-      {/* Warm radial glow for personal variant */}
-      {isPersonal && (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
-      )}
-
+    <section ref={containerRef} className={`relative py-10 md:py-16 px-4 ${isPersonal ? 'overflow-hidden' : ''}`}>
+      {isPersonal && <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/[0.03] rounded-full blur-[120px] pointer-events-none" />}
       <div className={`relative mx-auto ${isPersonal ? 'max-w-lg' : 'max-w-4xl'}`}>
-        {/* Section heading */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: '-50px' }}
-          transition={{ duration: 0.7 }}
-          className="text-center mb-6 md:mb-8"
-        >
-          <span className={`inline-block text-xs font-bold tracking-[0.25em] uppercase mb-3 ${isWarm ? 'text-amber-400' : 'text-[#39FF14]'}`}>{label}</span>
-          <h2 className={`font-extrabold ${isPersonal ? 'text-xl md:text-3xl' : 'text-2xl md:text-4xl'}`}>
-            {heading}{' '}
-            <span className={`bg-gradient-to-r ${isWarm ? 'from-amber-400 to-amber-300' : 'from-[#39FF14] to-[#5fff47]'} bg-clip-text text-transparent`}>
-              {headingHighlight}
-            </span>
-          </h2>
-          {isPersonal && (
-            <motion.p
-              initial={{ opacity: 0 }}
-              whileInView={{ opacity: 1 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.3 }}
-              className="mt-2 text-white/35 text-sm max-w-sm mx-auto"
-            >
-              Conoce de primera mano quién está detrás de tu bienestar
-            </motion.p>
-          )}
+        <motion.div initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.7 }} className="text-center mb-5">
+          <span className={`inline-block text-xs font-bold tracking-[0.25em] uppercase mb-2 ${isWarm ? 'text-amber-400' : 'text-[#39FF14]'}`}>{label}</span>
+          <h2 className={`font-extrabold ${isPersonal ? 'text-xl md:text-3xl' : 'text-2xl md:text-4xl'}`}>{heading} <span className={`bg-gradient-to-r ${isWarm ? 'from-amber-400 to-amber-300' : 'from-[#39FF14] to-[#5fff47]'} bg-clip-text text-transparent`}>{headingHighlight}</span></h2>
+          {isPersonal && <p className="mt-2 text-white/35 text-sm max-w-sm mx-auto">Conoce de primera mano quién está detrás de tu bienestar</p>}
         </motion.div>
-
-        {/* Video container */}
-        <motion.div
-          initial={{ opacity: 0, y: 30, scale: 0.97 }}
-          whileInView={{ opacity: 1, y: 0, scale: 1 }}
-          viewport={{ once: true, margin: '-30px' }}
-          transition={{ duration: 0.8, delay: 0.15 }}
-          className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 bg-black"
-          style={{ boxShadow: `0 0 60px ${glowColor}` }}
-        >
-          {/* Glow ring */}
+        <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.15 }} className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 bg-black" style={{ boxShadow: `0 0 60px ${glowColor}` }}>
           <div className={`absolute -inset-1 bg-gradient-to-r ${isWarm ? 'from-amber-500/10 via-transparent to-amber-500/10' : 'from-[#39FF14]/10 via-transparent to-[#39FF14]/10'} rounded-3xl blur-sm pointer-events-none`} />
-
           <div className={`relative bg-black rounded-2xl md:rounded-3xl overflow-hidden ${isPersonal ? 'aspect-[9/16] sm:aspect-[9/14] md:aspect-[9/12] max-h-[70vh] md:max-h-[600px]' : 'aspect-[9/16] sm:aspect-[9/14] md:aspect-video max-h-[75vh] md:max-h-none'}`}>
-            <video
-              ref={videoRef}
-              src={src}
-              playsInline
-              muted
-              onEnded={handleEnded}
-              onPlay={() => setIsPlaying(true)}
-              onPause={() => setIsPlaying(false)}
-              className="w-full h-full object-cover"
-              preload="none"
-            />
-
-            {/* Dark overlay gradient at bottom for controls visibility */}
+            <video ref={videoRef} src={src} playsInline muted onEnded={handleEnded} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} className="w-full h-full object-cover" preload="none" />
             <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
-
-            {/* ─── SOUND ACTIVATE BUTTON (magic glow) ─── */}
-            <AnimatePresence>
-              {showSoundBtn && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 1 }}
-                  onClick={activateSound}
-                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full text-black font-bold text-xs md:text-sm transition-shadow duration-300 cursor-pointer"
-                  style={{
-                    background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`,
-                    boxShadow: `0 0 30px ${glowShadow}0.4)`,
-                  }}
-                >
-                  <Volume2 className="w-4 h-4" />
-                  <span>Activar sonido</span>
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />
-                </motion.button>
-              )}
-            </AnimatePresence>
-
-            {/* ─── PAUSE INDICATOR ─── */}
-            <AnimatePresence>
-              {!isPlaying && !isEnded && hasAutoPlayed && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={togglePlayPause}
-                  className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 cursor-pointer"
-                >
-                  <motion.div
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20"
-                  >
-                    <Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" />
-                  </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* ─── PLAY BUTTON (before first play) ─── */}
-            <AnimatePresence>
-              {!isPlaying && !isEnded && !hasAutoPlayed && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  onClick={togglePlayPause}
-                  className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 cursor-pointer"
-                >
-                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/15">
-                    <Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" />
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* ─── ENDED OVERLAY (Replay) ─── */}
-            <AnimatePresence>
-              {isEnded && (
-                <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4"
-                >
-                  <motion.button
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    onClick={handleReplay}
-                    className="flex items-center gap-3 px-8 py-4 rounded-full text-black font-bold text-base md:text-lg transition-shadow duration-300 cursor-pointer"
-                    style={{
-                      background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`,
-                      boxShadow: `0 0 40px ${glowShadow}0.3)`,
-                    }}
-                  >
-                    <RotateCcw className="w-5 h-5" />
-                    Ver de nuevo
-                  </motion.button>
-                  {!isMuted && (
-                    <span className="text-white/40 text-xs">Con audio 🔊</span>
-                  )}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* ─── BOTTOM CONTROLS ─── */}
-            <div
-              onClick={togglePlayPause}
-              className="absolute bottom-0 inset-x-0 h-16 z-10 flex items-center justify-between px-4 cursor-pointer"
-            >
-              <button
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const vid = videoRef.current
-                  if (!vid) return
-                  vid.muted = !vid.muted
-                  setIsMuted(vid.muted)
-                  if (vid.muted) setShowSoundBtn(false)
-                }}
-                className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors duration-200"
-              >
-                {isMuted ? <VolumeX className="w-4 h-4 text-white/70" /> : <Volume2 className="w-4 h-4 text-[#39FF14]" />}
-              </button>
+            <AnimatePresence>{showSoundBtn && (<motion.button initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 1 }} onClick={activateSound} className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full text-black font-bold text-xs md:text-sm cursor-pointer" style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 30px ${glowShadow}0.4)` }}><Volume2 className="w-4 h-4" /><span>Activar sonido</span><span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" /></motion.button>)}</AnimatePresence>
+            <AnimatePresence>{!isPlaying && !isEnded && hasAutoPlayed && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={togglePlayPause} className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 cursor-pointer"><div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20"><Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" /></div></motion.div>)}</AnimatePresence>
+            <AnimatePresence>{!isPlaying && !isEnded && !hasAutoPlayed && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={togglePlayPause} className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 cursor-pointer"><div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/15"><Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" /></div></motion.div>)}</AnimatePresence>
+            <AnimatePresence>{isEnded && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4"><motion.button initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} onClick={handleReplay} className="flex items-center gap-3 px-8 py-4 rounded-full text-black font-bold text-base md:text-lg cursor-pointer" style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 40px ${glowShadow}0.3)` }}><RotateCcw className="w-5 h-5" />Ver de nuevo</motion.button>{!isMuted && <span className="text-white/40 text-xs">Con audio 🔊</span>}</motion.div>)}</AnimatePresence>
+            <div onClick={togglePlayPause} className="absolute bottom-0 inset-x-0 h-16 z-10 flex items-center justify-between px-4 cursor-pointer">
+              <button onClick={(e) => { e.stopPropagation(); const vid = videoRef.current; if (!vid) return; vid.muted = !vid.muted; setIsMuted(vid.muted); if (vid.muted) setShowSoundBtn(false) }} className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors duration-200">{isMuted ? <VolumeX className="w-4 h-4 text-white/70" /> : <Volume2 className="w-4 h-4 text-[#39FF14]" />}</button>
               <span className="text-white/30 text-[10px]">Toca para pausar</span>
             </div>
           </div>
         </motion.div>
+        {isPersonal && (<motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ delay: 0.5 }} className="mt-5 text-center"><div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20"><ShieldCheck className="w-3.5 h-3.5 text-amber-400" /><span className="text-amber-300/80 text-xs font-medium">Producto 100% certificado · Registro INVIMA · Hecho con amor en Colombia</span></div></motion.div>)}
+      </div>
+    </section>
+  )
+}
 
-        {/* Personal variant: trust message below video */}
-        {isPersonal && (
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5, duration: 0.6 }}
-            className="mt-5 text-center"
-          >
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
-              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
-              <span className="text-amber-300/80 text-xs font-medium">Producto 100% certificado · Registro INVIMA · Hecho con amor en Colombia</span>
-            </div>
-          </motion.div>
-        )}
+/* ─────────────────────────────────────────────
+   FAQ ACCORDION
+   ───────────────────────────────────────────── */
+function FAQSection() {
+  const { ref, inView } = useInView(0.05)
+  const [openIdx, setOpenIdx] = useState<number | null>(0)
+  return (
+    <section ref={ref} className="relative py-16 md:py-24 px-4">
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-10">
+          <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-3">Preguntas frecuentes</motion.span>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-2xl md:text-4xl font-extrabold">
+            Resolvemos tus <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">dudas</span>
+          </motion.h2>
+        </div>
+        <div className="space-y-3">
+          {FAQ_ITEMS.map((item, i) => (
+            <motion.div key={i} initial={{ opacity: 0, y: 15 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.4, delay: 0.2 + i * 0.07 }} className="border border-white/[0.06] rounded-2xl overflow-hidden bg-white/[0.02] hover:border-[#39FF14]/15 transition-colors duration-300">
+              <button onClick={() => setOpenIdx(openIdx === i ? null : i)} className="w-full flex items-center justify-between px-5 py-4 text-left cursor-pointer" aria-expanded={openIdx === i}>
+                <span className="text-white text-sm md:text-base font-semibold pr-4">{item.q}</span>
+                <ChevronUp className={`w-4 h-4 text-[#39FF14]/60 flex-shrink-0 transition-transform duration-300 ${openIdx === i ? '' : 'rotate-180'}`} />
+              </button>
+              <AnimatePresence initial={false}>
+                {openIdx === i && (
+                  <motion.div initial={{ height: 0, opacity: 0 }} animate={{ height: 'auto', opacity: 1 }} exit={{ height: 0, opacity: 0 }} transition={{ duration: 0.3, ease: 'easeInOut' }} className="overflow-hidden">
+                    <p className="px-5 pb-4 text-white/50 text-sm leading-relaxed">{item.a}</p>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </motion.div>
+          ))}
+        </div>
       </div>
     </section>
   )
@@ -470,12 +311,11 @@ export default function Home() {
   const heroRef = useRef<HTMLDivElement>(null)
   const heroSectionScroll = useScroll({ target: heroRef, offset: ['start start', 'end start'] })
   const productOpacity = useTransform(heroSectionScroll.scrollYProgress, [0, 0.85], [1, 0])
-  const openWhatsApp = useCallback(() => { window.open(WHATSAPP_URL, '_blank', 'noopener,noreferrer') }, [])
 
   return (
     <main className="min-h-screen bg-black text-white overflow-x-hidden">
 
-      {/* ═══════ HERO ═══════ */}
+      {/* ═══════ HERO — DOLOR ═══════ */}
       <section ref={heroRef} className="relative min-h-screen overflow-hidden">
         <div className="absolute inset-0 z-0">
           <img src="/hero-bg.webp" alt="" className="w-full h-full object-cover opacity-30" aria-hidden="true" />
@@ -487,34 +327,30 @@ export default function Home() {
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left max-w-xl lg:max-w-2xl">
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#39FF14]/20 bg-[#39FF14]/5 mb-5 md:mb-6">
               <BadgeCheck className="w-3.5 h-3.5 text-[#39FF14]" />
-              <span className="text-[#39FF14] text-xs md:text-sm font-medium tracking-wide">Registro INVIMA · 100% Natural · Vegano</span>
+              <span className="text-[#39FF14] text-xs md:text-sm font-medium tracking-wide">100% Natural · Sin laxantes · Registro INVIMA</span>
             </motion.div>
 
             <motion.h1 initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.8, delay: 0.3 }} className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-extrabold leading-[1.05] tracking-tight">
-              <span className="block">Tu cuerpo merece</span>
-              <span className="block bg-gradient-to-r from-[#39FF14] via-[#5fff47] to-[#39FF14] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">sentirse libre.</span>
+              <span className="block">¿Hinchado, pesado</span>
+              <span className="block">y sin poder</span>
+              <span className="block bg-gradient-to-r from-[#39FF14] via-[#5fff47] to-[#39FF14] bg-clip-text text-transparent bg-[length:200%_auto] animate-[shimmer_3s_linear_infinite]">ir al baño?</span>
             </motion.h1>
 
-            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.6 }} className="mt-3 md:mt-5 text-base md:text-lg text-white/45 leading-relaxed">
-              Desintoxica tu colon, reduce la inflamación y recupera tu energía. Fórmula con{' '}
-              <span className="text-[#39FF14] font-semibold">9 ingredientes naturales</span> incluyendo Noni, Linaza, Espirulina, Alcachofa y Pitaya.
+            <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.6 }} className="mt-3 md:mt-5 text-base md:text-lg text-white/50 leading-relaxed">
+              En solo <span className="text-[#39FF14] font-bold">7 días</span> puedes sentir tu colon limpio, sin inflamación y sin gases. Fórmula natural que <span className="text-white/80 font-semibold">no irrita ni causa dolores estomacales</span>.
             </motion.p>
 
-            {/* Quick stats */}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.8, duration: 0.5 }} className="mt-4 flex flex-wrap items-center justify-center lg:justify-start gap-4 text-xs text-white/30">
-              <span className="flex items-center gap-1"><Flame className="w-3 h-3 text-orange-400/60" /> Solo 34 calorías por porción</span>
-              <span className="flex items-center gap-1"><Leaf className="w-3 h-3 text-[#39FF14]/60" /> Sin azúcar añadida</span>
-              <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3 text-[#39FF14]/60" /> Sin gluten ni lactosa</span>
-            </motion.div>
-
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.9 }} className="mt-5 md:mt-7 flex flex-col items-center lg:items-start gap-3">
-              <GlowButton onClick={openWhatsApp}>
-                <MessageCircle className="w-5 h-5" /> Quiero mi promo 2x3 <ArrowRight className="w-4 h-4" />
+              <GlowButton href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola! Quiero pedir ColiPlus 💚')}`}>
+                <MessageCircle className="w-5 h-5" /> Quiero mi Kit + Envío Gratis <ArrowRight className="w-4 h-4" />
               </GlowButton>
-              <span className="text-white/20 text-[10px] sm:text-[11px] md:text-xs whitespace-nowrap w-full text-center lg:text-left" style={{ fontSize: 'clamp(9px, 2.6vw, 12px)' }}>Envío gratis · Pago contra entrega · Nequi · Bancolombia · PSE</span>
+              <span className="text-white/25 text-[10px] md:text-xs flex items-center gap-2 flex-wrap justify-center lg:justify-start">
+                <span className="flex items-center gap-1"><Truck className="w-3 h-3 text-[#39FF14]/50" /> Envío gratis</span>
+                <span className="text-white/10">·</span>
+                <span className="flex items-center gap-1"><Banknote className="w-3 h-3 text-[#39FF14]/50" /> Pagas al recibir</span>
+              </span>
             </motion.div>
 
-            {/* Gift badge */}
             <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 0.5, delay: 1.2 }} className="mt-3 inline-flex items-center gap-2.5 px-4 py-2.5 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06]">
               <Gift className="w-4 h-4 text-amber-400" />
               <span className="text-amber-300/90 text-xs md:text-sm font-semibold">Loción Termoactiva GRATIS con tu compra</span>
@@ -533,20 +369,15 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* ═══════ VIDEO ═══════ */}
-      <VideoPlayer
-        src="/coliplus-video.mp4"
-        label="🎬 Mira cómo funciona"
-        heading="Descubre el"
-        headingHighlight="poder de ColiPlus"
-      />
+      {/* ═══════ AGITACIÓN — CHECKLIST ═══════ */}
+      <AgitationSection />
       <SectionDivider />
+
+      {/* ═══════ VIDEO ═══════ */}
+      <VideoPlayer src="/coliplus-video.mp4" label="🎬 Mira cómo funciona" heading="Descubre el" headingHighlight="poder de ColiPlus" />
 
       {/* ═══════ SOCIAL PROOF BAR ═══════ */}
       <SocialProofBar />
-
-      {/* ═══════ PROBLEM ═══════ */}
-      <ProblemSection />
       <SectionDivider />
 
       {/* ═══════ INGREDIENTS ═══════ */}
@@ -561,9 +392,8 @@ export default function Home() {
       <HowItWorksSection />
       <SectionDivider />
 
-      {/* ═══════ OFFER ═══════ */}
-      <OfferSection openWhatsApp={openWhatsApp} />
-      <SectionDivider />
+      {/* ═══════ OFERTA — 3 KITS ═══════ */}
+      <OfferSection />
 
       {/* ═══════ PAYMENT METHODS ═══════ */}
       <PaymentMethodsSection />
@@ -577,18 +407,14 @@ export default function Home() {
       <SectionDivider />
 
       {/* ═══════ WELCOME VIDEO ═══════ */}
-      <VideoPlayer
-        src="/coliplus-bienvenida.mp4"
-        label="🤝 Un mensaje para ti"
-        heading="Te damos la"
-        headingHighlight="bienvenida"
-        accent="warm"
-        variant="personal"
-      />
+      <VideoPlayer src="/coliplus-bienvenida.mp4" label="🤝 Un mensaje para ti" heading="Te damos la" headingHighlight="bienvenida" accent="warm" variant="personal" />
+
+      {/* ═══════ FAQ ═══════ */}
+      <FAQSection />
       <SectionDivider />
 
       {/* ═══════ FINAL CTA ═══════ */}
-      <FinalCTASection openWhatsApp={openWhatsApp} />
+      <FinalCTASection />
 
       {/* Footer */}
       <footer className="bg-black border-t border-white/5 py-10 px-4">
@@ -597,9 +423,7 @@ export default function Home() {
             <Leaf className="w-5 h-5 text-[#39FF14]" />
             <span className="text-white font-bold text-lg">ColiPlus</span>
           </div>
-          <p className="text-white/25 text-xs md:text-sm mb-2">
-            Mezcla natural en fibra · Noni, Linaza, Pitaya, Flor de Jamaica, Alcachofa, Semillas de Chía, Espirulina, Té Verde y Stevia
-          </p>
+          <p className="text-white/25 text-xs md:text-sm mb-2">Mezcla natural en fibra · Noni, Linaza, Pitaya, Flor de Jamaica, Alcachofa, Semillas de Chía, Espirulina, Té Verde y Stevia</p>
           <p className="text-white/20 text-xs mb-1">Tarro de 450g · Porción 18g · Sabor Manzana Verde · Solo 34 kcal/porción</p>
           <p className="text-white/20 text-xs">© {new Date().getFullYear()} ColiPlus · Producto con Registro INVIMA · Todos los derechos reservados</p>
           <p className="text-white/15 text-[10px] mt-1">Este producto no está diseñado para diagnosticar, tratar, curar o prevenir ninguna enfermedad. Consulte a su médico antes de usar.</p>
@@ -608,6 +432,47 @@ export default function Home() {
 
       <FloatingWhatsApp />
     </main>
+  )
+}
+
+/* ─────────────────────────────────────────────
+   AGITATION SECTION — CHECKLIST DE DOLOR
+   ───────────────────────────────────────────── */
+function AgitationSection() {
+  const { ref, inView } = useInView(0.05)
+  return (
+    <section ref={ref} className="relative py-16 md:py-24 px-4">
+      <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-red-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+      <div className="max-w-3xl mx-auto">
+        <div className="text-center mb-10">
+          <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6 }} className="inline-block text-red-400/80 text-xs font-bold tracking-[0.25em] uppercase mb-4">Sesgo de confirmación</motion.span>
+          <motion.h2 initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.15 }} className="text-3xl md:text-5xl font-extrabold leading-tight mb-4">
+            ¿Te pasa esto <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">seguido?</span>
+          </motion.h2>
+          <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.3 }} className="text-white/35 text-sm md:text-base max-w-md mx-auto">
+            Si identificas 2 o más de estos síntomas, tu colon necesita ayuda urgente.
+          </motion.p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4">
+          {PAIN_POINTS.map((item, i) => (
+            <motion.div key={i} initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30, filter: 'blur(8px)' }} animate={inView ? { opacity: 1, x: 0, filter: 'blur(0px)' } : {}} transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }} className="flex items-center gap-4 bg-gradient-to-r from-red-500/[0.06] to-transparent border border-red-500/[0.08] rounded-xl px-4 py-3.5 hover:border-red-500/20 transition-colors duration-300">
+              <span className="text-xl flex-shrink-0">{item.icon}</span>
+              <p className="text-white/70 text-sm font-medium">{item.text}</p>
+            </motion.div>
+          ))}
+        </div>
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 1.1 }} className="mt-8 text-center">
+          <p className="text-white/35 text-sm md:text-base max-w-xl mx-auto">
+            Eso no es normal y <span className="text-white/70 font-semibold">no tenés por qué vivir así.</span> Miles ya recuperaron su bienestar digestivo con ColiPlus.
+          </p>
+          <div className="mt-4">
+            <GlowButton href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola! Tengo esos síntomas y quiero probar ColiPlus 💚')}`} size="md">
+              <MessageCircle className="w-4 h-4" /> Quiero sentirme bien <ArrowRight className="w-3.5 h-3.5" />
+            </GlowButton>
+          </div>
+        </motion.div>
+      </div>
+    </section>
   )
 }
 
@@ -640,59 +505,19 @@ function SocialProofBar() {
 }
 
 /* ─────────────────────────────────────────────
-   PROBLEM SECTION
-   ───────────────────────────────────────────── */
-function ProblemSection() {
-  const { ref, inView } = useInView(0.05)
-  return (
-    <section ref={ref} className="relative py-20 md:py-28 px-4">
-      <div className="absolute top-1/2 left-0 w-[300px] h-[300px] bg-red-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
-      <div className="max-w-4xl mx-auto text-center">
-        <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6 }} className="inline-block text-red-400/80 text-xs font-bold tracking-[0.25em] uppercase mb-4">¿Te suena familiar?</motion.span>
-        <motion.h2 initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.15 }} className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-4">
-          Esa sensación de <span className="bg-gradient-to-r from-red-400 to-orange-400 bg-clip-text text-transparent">pesadez</span> no es normal.
-        </motion.h2>
-        <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.3 }} className="text-white/40 text-sm md:text-base max-w-xl mx-auto mb-12">
-          Miles de personas viven con molestias que creen normales. El estreñimiento crónico, los gases y la inflamación son señales de que tu colon necesita ayuda.
-        </motion.p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 md:gap-6">
-          {[
-            { icon: '😣', title: 'Inflamación constante', desc: 'Te levantas hinchado y terminas el día peor. Tu ropa ya no te queda igual.', accent: 'from-red-500/20 to-orange-500/20' },
-            { icon: '😫', title: 'Digestión lenta y gases', desc: 'Sientes que todo se queda estancado. Gases, pesadez y molestias sin parar.', accent: 'from-orange-500/20 to-yellow-500/20' },
-            { icon: '😩', title: 'Sin energía y agotado', desc: 'Tu cuerpo no absorbe nutrientes. Te sientes pesado y sin vitalidad todo el día.', accent: 'from-yellow-500/20 to-amber-500/20' },
-          ].map((item, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }} animate={inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}} transition={{ duration: 0.6, delay: 0.4 + i * 0.15 }} className={`relative bg-gradient-to-b ${item.accent} to-transparent border border-white/[0.06] rounded-2xl p-6 hover:border-white/10 transition-colors duration-300`}>
-              <span className="text-3xl block mb-3">{item.icon}</span>
-              <h3 className="text-white font-bold text-lg mb-2">{item.title}</h3>
-              <p className="text-white/45 text-sm leading-relaxed">{item.desc}</p>
-            </motion.div>
-          ))}
-        </div>
-        <motion.p initial={{ opacity: 0, y: 10 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.9 }} className="mt-10 text-white/35 text-sm md:text-base max-w-2xl mx-auto">
-          La alimentación moderna y el estrés acumulan toxinas en tu colon que tu cuerpo no puede eliminar solo. <span className="text-white/70 font-semibold">Hasta ahora.</span>
-        </motion.p>
-      </div>
-    </section>
-  )
-}
-
-/* ─────────────────────────────────────────────
    INGREDIENTS SECTION
    ───────────────────────────────────────────── */
 function IngredientsSection() {
   const { ref, inView } = useInView(0.05)
   return (
-    <section ref={ref} className="relative py-20 md:py-28 px-4">
+    <section ref={ref} className="relative py-16 md:py-24 px-4">
       <div className="absolute top-0 left-1/4 w-[500px] h-[500px] bg-[#39FF14]/[0.02] rounded-full blur-[150px] pointer-events-none" />
       <div className="relative max-w-6xl mx-auto">
         <div className="text-center mb-14">
-          <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">Los 3 protagonistas</motion.span>
+          <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">La solución natural</motion.span>
           <motion.h2 initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }} className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight">
             3 superpoderes, <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">1 solución.</span>
           </motion.h2>
-          <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.3 }} className="mt-3 text-white/35 text-sm md:text-base max-w-lg mx-auto">
-            Cada ingrediente fue seleccionado por su poder comprobado. Juntos, son imparables.
-          </motion.p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
           {INGREDIENTS.map((ingredient, i) => <IngredientCard key={ingredient.id} ingredient={ingredient} index={i} />)}
@@ -703,23 +528,19 @@ function IngredientsSection() {
 }
 
 /* ─────────────────────────────────────────────
-   FULL FORMULA SECTION (9 ingredients)
+   FULL FORMULA SECTION
    ───────────────────────────────────────────── */
 function FullFormulaSection() {
   const { ref, inView } = useInView(0.1)
   return (
-    <section ref={ref} className="relative py-16 md:py-24 px-4">
+    <section ref={ref} className="relative py-12 md:py-20 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-10">
           <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-3">Fórmula completa</motion.span>
-          <motion.h3 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-2xl md:text-4xl font-extrabold">
-            9 ingredientes, <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">0 azúcar</span>
-          </motion.h3>
-          <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="mt-2 text-white/35 text-sm">
-            Solo 34 calorías por porción · Endulzado con Stevia · Sabor Manzana Verde
-          </motion.p>
+          <motion.h3 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-2xl md:text-4xl font-extrabold">9 ingredientes, <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">0 azúcar</span></motion.h3>
+          <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="mt-2 text-white/35 text-sm">Solo 34 calorías por porción · Endulzado con Stevia · Sabor Manzana Verde</motion.p>
         </div>
-        <div className="grid grid-cols-3 sm:grid-cols-3 md:grid-cols-3 gap-3 md:gap-4">
+        <div className="grid grid-cols-3 gap-3 md:gap-4">
           {ALL_INGREDIENTS.map((ing, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }} animate={inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}} transition={{ duration: 0.5, delay: 0.3 + i * 0.07 }} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-3 md:p-4 text-center hover:border-[#39FF14]/20 transition-colors duration-300">
               <p className="text-white font-bold text-sm md:text-base">{ing.name}</p>
@@ -729,11 +550,7 @@ function FullFormulaSection() {
         </div>
         <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 1.2 }} className="mt-8 flex flex-wrap items-center justify-center gap-5 md:gap-8 text-white/25 text-xs">
           {[
-            { icon: Leaf, label: '100% Natural' },
-            { icon: ShieldCheck, label: 'Sin Gluten' },
-            { icon: Sparkles, label: 'Producto Vegano' },
-            { icon: Heart, label: 'Sin Lactosa' },
-            { icon: Award, label: 'Registro INVIMA' },
+            { icon: Leaf, label: '100% Natural' }, { icon: ShieldCheck, label: 'Sin Gluten' }, { icon: Sparkles, label: 'Producto Vegano' }, { icon: Heart, label: 'Sin Lactosa' }, { icon: Award, label: 'Registro INVIMA' },
           ].map((badge, i) => (
             <div key={i} className="flex items-center gap-1.5"><badge.icon className="w-3.5 h-3.5 text-[#39FF14]/40" /><span>{badge.label}</span></div>
           ))}
@@ -751,10 +568,10 @@ function HowItWorksSection() {
   const steps = [
     { num: '01', title: 'Mezcla', desc: 'Agrega 1 cucharada (18g) en agua o jugo. Delicioso sabor a manzana verde, sin azúcar añadida.', icon: '🥤' },
     { num: '02', title: 'Bebe', desc: 'Tómalo en ayunas o antes de dormir. La fibra prebiótica actúa desde el primer vaso.', icon: '💧' },
-    { num: '03', title: 'Transforma', desc: 'En 7-14 días sientes la diferencia: menos inflamación, más energía, mejor digestión.', icon: '⚡' },
+    { num: '03', title: 'Siente', desc: 'En 7-14 días: menos inflamación, mejor tránsito, más energía. Sin dolores, sin laxantes.', icon: '⚡' },
   ]
   return (
-    <section ref={ref} className="relative py-20 md:py-28 px-4">
+    <section ref={ref} className="relative py-16 md:py-24 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-14">
           <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">Simple y efectivo</motion.span>
@@ -783,54 +600,75 @@ function HowItWorksSection() {
 }
 
 /* ─────────────────────────────────────────────
-   OFFER SECTION
+   OFERTA — 3 KITS CON ANCLAJE DE PRECIO
    ───────────────────────────────────────────── */
-function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
+function OfferSection() {
   const { ref, inView } = useInView(0.1)
   return (
     <section ref={ref} className="relative py-20 md:py-32 px-4 overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#39FF14]/[0.025] rounded-full blur-[160px] pointer-events-none" />
-      <div className="relative max-w-4xl mx-auto text-center">
-        <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">🔥 Oferta exclusiva</motion.span>
-        <motion.h2 initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}} transition={{ duration: 0.7, delay: 0.1 }} className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight">Paga 2 Lleva 3</motion.h2>
-        <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.25 }} className="mt-2 text-white/40 text-sm md:text-base">3 tarros de ColiPlus · 450g c/u · Sabor Manzana Verde · 25 porciones por tarro</motion.p>
+      <div className="relative max-w-5xl mx-auto text-center">
+        <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">🔥 Oferta exclusiva hoy</motion.span>
+        <motion.h2 initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}} transition={{ duration: 0.7, delay: 0.1 }} className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight">Elige tu Kit</motion.h2>
+        <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.25 }} className="mt-2 text-white/40 text-sm md:text-base">Tarros de 450g · Sabor Manzana Verde · 25 porciones por tarro</motion.p>
 
-        {/* Pricing Tiers */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.3 }} className="mt-8 md:mt-10">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-3xl mx-auto">
-            {PRICING_TIERS.map((tier, i) => (
+        {/* Urgency */}
+        <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.3 }} className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/20">
+          <Clock className="w-3.5 h-3.5 text-red-400" />
+          <span className="text-red-300 text-xs font-bold">Oferta válida solo por hoy o hasta agotar existencias</span>
+        </motion.div>
+
+        {/* 3 Kit Cards */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.35 }} className="mt-8 md:mt-10">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-5 max-w-3xl mx-auto">
+            {KITS.map((kit, i) => (
               <motion.a
-                key={i}
-                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${tier.msg}`}
+                key={kit.id}
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${kit.msg}`}
                 target="_blank"
                 rel="noopener noreferrer"
                 initial={{ opacity: 0, y: 20 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
-                className={`relative rounded-2xl p-4 md:p-5 text-center border transition-all duration-300 cursor-pointer hover:scale-[1.03] block group ${tier.highlight ? 'bg-[#39FF14]/[0.08] border-[#39FF14]/40 shadow-[0_0_30px_rgba(57,255,20,0.1)]' : 'bg-white/[0.03] border-white/[0.06] hover:border-[#39FF14]/20'}`}
+                className={`relative rounded-2xl p-5 md:p-6 text-center border transition-all duration-300 cursor-pointer hover:scale-[1.03] block group ${kit.highlight ? 'bg-[#39FF14]/[0.08] border-[#39FF14]/40 shadow-[0_0_40px_rgba(57,255,20,0.12)] ring-2 ring-[#39FF14]/20' : 'bg-white/[0.03] border-white/[0.06] hover:border-[#39FF14]/20'}`}
               >
-                {tier.savings && (
-                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase ${tier.highlight ? 'bg-[#39FF14] text-black' : 'bg-white/10 text-white/50 border border-white/10'}`}>
-                    {tier.savings}
+                {kit.tag && (
+                  <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-black tracking-wide uppercase ${kit.highlight ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.4)]' : 'bg-white/10 text-white/50 border border-white/10'}`}>
+                    {kit.tag}
                   </span>
                 )}
-                <p className="text-white/50 text-[10px] md:text-xs font-medium mb-1 mt-1">{tier.qty}</p>
-                <p className={`text-2xl md:text-3xl font-black ${tier.highlight ? 'bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent' : 'text-white'}`}>{tier.price}</p>
-                <p className="text-white/25 text-[9px] md:text-[10px] mt-1">{tier.unit}</p>
-                <div className={`mt-3 flex items-center justify-center gap-1.5 rounded-full py-1.5 px-3 text-[10px] font-bold transition-all duration-300 ${tier.highlight ? 'bg-[#39FF14] text-black group-hover:shadow-[0_0_20px_rgba(57,255,20,0.3)]' : 'bg-white/[0.08] text-white/60 group-hover:bg-[#25D366]/20 group-hover:text-white'}`}>
-                  <MessageCircle className="w-3 h-3" /> Pedir ya
+                <p className="text-white/40 text-[10px] md:text-xs font-bold tracking-wider uppercase mb-1 mt-1">{kit.name}</p>
+                <p className="text-white/50 text-xs md:text-sm mb-2">{kit.qty}</p>
+                <p className={`text-3xl md:text-4xl font-black ${kit.highlight ? 'bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent' : 'text-white'}`}>{kit.price}</p>
+                <p className="text-white/30 text-[10px] md:text-xs mt-1">{kit.unitPrice}</p>
+                {kit.savings && (
+                  <span className="inline-block mt-2 px-3 py-0.5 rounded-full bg-[#39FF14]/10 text-[#39FF14] text-[10px] font-bold">{kit.savings}</span>
+                )}
+
+                {/* CTA button inside card */}
+                <div className={`mt-4 flex items-center justify-center gap-2 rounded-full py-3 px-5 text-xs md:text-sm font-bold transition-all duration-300 ${kit.highlight ? 'bg-[#39FF14] text-black group-hover:shadow-[0_0_25px_rgba(57,255,20,0.4)]' : 'bg-white/[0.08] text-white/70 group-hover:bg-[#25D366]/20 group-hover:text-white'}`} style={{ minHeight: '44px' }}>
+                  <MessageCircle className="w-4 h-4" /> Pedir por WhatsApp
+                </div>
+
+                {/* Shipping + payment inside card */}
+                <div className="mt-3 flex items-center justify-center gap-2 text-white/25 text-[9px] md:text-[10px]">
+                  <Truck className="w-3 h-3" /> Envío gratis
+                  <span className="text-white/10">·</span>
+                  <Banknote className="w-3 h-3" /> Pagas al recibir
                 </div>
               </motion.a>
             ))}
           </div>
-          <div className="mt-5">
-            <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/20 text-[#39FF14] text-sm font-semibold">
-              <Sparkles className="w-3.5 h-3.5" /> + Loción Termoactiva GRATIS en toda compra
+
+          {/* Gift badge */}
+          <div className="mt-6">
+            <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-300 text-sm font-semibold">
+              <Gift className="w-3.5 h-3.5" /> + Loción Termoactiva GRATIS en toda compra
             </span>
           </div>
         </motion.div>
 
-        {/* 🎁 OBSEQUIO DESTACADO */}
+        {/* 🎁 OBSEQUIO */}
         <motion.div initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}} transition={{ duration: 0.7, delay: 0.45 }} className="mt-8 md:mt-10 relative">
           <div className="absolute inset-0 bg-amber-500/[0.04] rounded-3xl blur-[40px] pointer-events-none" />
           <div className="relative bg-gradient-to-br from-amber-500/[0.08] via-amber-400/[0.04] to-transparent border border-amber-500/20 rounded-3xl p-5 md:p-7 overflow-hidden">
@@ -848,12 +686,8 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
                   <Gift className="w-3.5 h-3.5 text-amber-400" />
                   <span className="text-amber-300 text-[11px] font-bold tracking-[0.2em] uppercase">Obsequio exclusivo</span>
                 </div>
-                <h3 className="text-xl md:text-2xl font-extrabold text-white mb-1.5">
-                  Loción Termoactiva <span className="text-amber-400">Allpa Natural</span>
-                </h3>
-                <p className="text-white/50 text-sm leading-relaxed mb-3 max-w-md">
-                  Analgésico y antiinflamatorio tópico con <span className="text-white/70 font-medium">Árnica, Castaño de Indias, Caléndula, Hamamelis, Uña de Gato y Chuchuhuasi</span>. Alivia dolores musculares, torceduras, calambres y contracturas. 18ml.
-                </p>
+                <h3 className="text-xl md:text-2xl font-extrabold text-white mb-1.5">Loción Termoactiva <span className="text-amber-400">Allpa Natural</span></h3>
+                <p className="text-white/50 text-sm leading-relaxed mb-3 max-w-md">Analgésico y antiinflamatorio tópico con <span className="text-white/70 font-medium">Árnica, Castaño de Indias, Caléndula, Hamamelis, Uña de Gato y Chuchuhuasi</span>. Alivia dolores musculares, torceduras, calambres y contracturas. 18ml.</p>
                 <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
                   {['Torceduras', 'Esguinces', 'Calambres', 'Contracturas', 'Tortícolis'].map((use, i) => (
                     <span key={i} className="inline-flex items-center gap-1 px-2.5 py-1 bg-amber-500/[0.08] border border-amber-500/15 rounded-full text-amber-300/80 text-[10px] font-medium">
@@ -870,11 +704,11 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
           </div>
         </motion.div>
 
-        {/* Trust badges */}
+        {/* Trust seals near CTA */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.6 }} className="mt-10 md:mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6">
           {[
             { icon: Truck, label: 'Envío Gratis', sub: 'A toda Colombia' },
-            { icon: ShieldCheck, label: 'Pago Contra Entrega', sub: 'Pagas al recibir' },
+            { icon: ShieldCheck, label: 'Pago Contra Entrega', sub: 'Pagas al recibir en casa' },
             { icon: Award, label: 'Registro INVIMA', sub: 'Producto certificado' },
           ].map((badge, i) => (
             <div key={i} className="flex items-center gap-3 bg-white/[0.03] rounded-2xl px-5 py-4 border border-white/[0.06] hover:border-[#39FF14]/15 transition-colors duration-300">
@@ -883,34 +717,24 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
             </div>
           ))}
         </motion.div>
-
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.8 }} className="mt-10 md:mt-14 flex flex-col items-center gap-3">
-          <GlowButton onClick={openWhatsApp} className="shadow-[0_0_50px_rgba(57,255,20,0.15)]">
-            <MessageCircle className="w-5 h-5" /> Quiero mi promo 2x3 + Obsequio <ArrowRight className="w-4 h-4" />
-          </GlowButton>
-          <span className="text-white/20 text-xs">Sin pagos por adelantado · Recibe primero, paga después · Loción Termoactiva GRATIS</span>
-        </motion.div>
       </div>
     </section>
   )
 }
 
 /* ─────────────────────────────────────────────
-   PAYMENT METHODS SECTION
+   PAYMENT METHODS
    ───────────────────────────────────────────── */
 function PaymentMethodsSection() {
   const { ref, inView } = useInView(0.1)
   return (
-    <section ref={ref} className="relative py-16 md:py-24 px-4 border-y border-white/[0.04]">
+    <section ref={ref} className="relative py-12 md:py-20 px-4 border-y border-white/[0.04]">
       <div className="max-w-5xl mx-auto">
-        <div className="text-center mb-10">
+        <div className="text-center mb-8">
           <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-3">Paga como prefieras</motion.span>
-          <motion.h3 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-2xl md:text-4xl font-extrabold">
-            Todos los <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">medios de pago</span>
-          </motion.h3>
-          <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="mt-2 text-white/35 text-sm">Pagos 100% seguros · Compra protegida · Sin complicaciones</motion.p>
+          <motion.h3 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-2xl md:text-4xl font-extrabold">Todos los <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">medios de pago</span></motion.h3>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 md:gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
           {PAYMENT_METHODS.map((pm, i) => (
             <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.4, delay: 0.3 + i * 0.08 }} className="bg-white/[0.03] border border-white/[0.06] rounded-xl p-4 text-center hover:border-[#39FF14]/20 transition-colors duration-300 flex flex-col items-center gap-2">
               <pm.icon className="w-5 h-5 text-[#39FF14]/70" />
@@ -919,16 +743,13 @@ function PaymentMethodsSection() {
             </motion.div>
           ))}
         </div>
-        <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 1 }} className="mt-6 text-center text-white/20 text-xs">
-          🔒 Transacciones encriptadas · Certificado SSL · Tus datos están protegidos
-        </motion.p>
       </div>
     </section>
   )
 }
 
 /* ─────────────────────────────────────────────
-   TESTIMONIALS SECTION
+   TESTIMONIALS
    ───────────────────────────────────────────── */
 function TestimonialsSection() {
   const { ref, inView } = useInView(0.1)
@@ -941,13 +762,11 @@ function TestimonialsSection() {
     { name: 'Irene Arroyo', text: 'Realmente es muy bueno, me ha ayudado mucho gracias Dios y gracias a sus creadores esto es una bendición', stars: 5, time: '1 sem', verified: true, screenshot: null },
   ]
   return (
-    <section ref={ref} className="relative py-20 md:py-28 px-4">
+    <section ref={ref} className="relative py-16 md:py-24 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-14">
+        <div className="text-center mb-12">
           <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">Resultados reales</motion.span>
-          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl md:text-5xl font-extrabold">
-            Lo que dicen <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">nuestros clientes</span>
-          </motion.h2>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl md:text-5xl font-extrabold">Lo que dicen <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">nuestros clientes</span></motion.h2>
           <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="mt-3 flex items-center justify-center gap-2">
             <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 text-[#39FF14] fill-[#39FF14]" />)}</div>
             <span className="text-white/30 text-sm">11.8K me gusta en Facebook · +5.000 clientes</span>
@@ -961,27 +780,15 @@ function TestimonialsSection() {
                 {t.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#39FF14]" />}
               </div>
               <p className="text-white/55 text-sm leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-white font-semibold text-xs">{t.name}</p>
-                  <span className="text-white/15 text-[9px]">Compra verificada · {t.time}</span>
-                </div>
-              </div>
-              {t.screenshot && (
-                <div className="mt-3 pt-3 border-t border-white/[0.04]">
-                  <img src={t.screenshot} alt={`Reseña de ${t.name}`} className="w-full rounded-lg border border-white/[0.06] opacity-70 hover:opacity-100 transition-opacity duration-300" loading="lazy" />
-                </div>
-              )}
+              <div><p className="text-white font-semibold text-xs">{t.name}</p><span className="text-white/15 text-[9px]">Compra verificada · {t.time}</span></div>
+              {t.screenshot && (<div className="mt-3 pt-3 border-t border-white/[0.04]"><img src={t.screenshot} alt={`Reseña de ${t.name}`} className="w-full rounded-lg border border-white/[0.06] opacity-70 hover:opacity-100 transition-opacity duration-300" loading="lazy" /></div>)}
             </motion.div>
           ))}
         </div>
-        {/* Facebook social proof image */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 1 }} className="mt-8 max-w-2xl mx-auto">
           <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 hover:border-[#39FF14]/15 transition-colors duration-300">
             <div className="flex items-center gap-2 mb-3">
-              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
-                <span className="text-blue-400 text-[10px] font-bold">f</span>
-              </div>
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center"><span className="text-blue-400 text-[10px] font-bold">f</span></div>
               <span className="text-white/40 text-xs font-medium">Prueba social en Facebook</span>
               <span className="text-white/20 text-[10px]">11.8K me gusta</span>
             </div>
@@ -994,46 +801,34 @@ function TestimonialsSection() {
 }
 
 /* ─────────────────────────────────────────────
-   ULTRA GUARANTEE SECTION
+   ULTRA GUARANTEE
    ───────────────────────────────────────────── */
 function UltraGuaranteeSection() {
   const { ref, inView } = useInView(0.1)
   return (
-    <section ref={ref} className="relative py-20 md:py-28 px-4 overflow-hidden">
+    <section ref={ref} className="relative py-16 md:py-24 px-4 overflow-hidden">
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#39FF14]/[0.02] rounded-full blur-[150px] pointer-events-none" />
       <div className="relative max-w-4xl mx-auto">
-        <div className="text-center mb-12">
+        <div className="text-center mb-10">
           <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">Garantía total</motion.span>
-          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl md:text-5xl font-extrabold">
-            Compra con <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">total confianza</span>
-          </motion.h2>
-          <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="mt-3 text-white/35 text-sm md:text-base max-w-lg mx-auto">
-            Tu seguridad es nuestra prioridad. Cada producto está respaldado por certificaciones oficiales y miles de clientes satisfechos.
-          </motion.p>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl md:text-5xl font-extrabold">Compra con <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">total confianza</span></motion.h2>
         </div>
 
-        {/* INVIMA Certification */}
+        {/* INVIMA */}
         <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.3 }} className="relative bg-gradient-to-br from-[#39FF14]/[0.06] via-[#39FF14]/[0.02] to-transparent border border-[#39FF14]/20 rounded-3xl p-6 md:p-8 mb-8 overflow-hidden">
           <div className="absolute top-0 right-0 w-40 h-40 bg-[#39FF14]/[0.04] rounded-full blur-[60px] pointer-events-none" />
-          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#39FF14]/[0.03] rounded-full blur-[50px] pointer-events-none" />
           <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-8">
             <div className="flex-shrink-0 text-center">
               <div className="relative">
                 <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-[#39FF14]/10 border-2 border-[#39FF14]/30 flex items-center justify-center mx-auto">
                   <ShieldCheck className="w-10 h-10 md:w-12 md:h-12 text-[#39FF14]" />
                 </div>
-                <div className="absolute -inset-3 rounded-full border border-[#39FF14]/10 animate-[spin_20s_linear_infinite]" />
-                <div className="absolute -inset-6 rounded-full border border-dashed border-[#39FF14]/5 animate-[spin_30s_linear_infinite_reverse]" />
               </div>
               <p className="mt-3 text-[#39FF14] text-xs font-bold tracking-widest uppercase">INVIMA</p>
             </div>
             <div className="text-center md:text-left flex-1">
-              <h3 className="text-xl md:text-2xl font-extrabold text-white mb-2">
-                Registro INVIMA <span className="text-[#39FF14]">Oficial</span>
-              </h3>
-              <p className="text-white/50 text-sm leading-relaxed mb-4">
-                ColiPlus cuenta con <span className="text-white/80 font-semibold">Registro Sanitario INVIMA</span>, lo que garantiza que el producto ha sido evaluado y aprobado por el Instituto Nacional de Vigilancia de Medicamentos y Alimentos de Colombia. Esto significa:
-              </p>
+              <h3 className="text-xl md:text-2xl font-extrabold text-white mb-2">Registro INVIMA <span className="text-[#39FF14]">Oficial</span></h3>
+              <p className="text-white/50 text-sm leading-relaxed mb-4">ColiPlus cuenta con <span className="text-white/80 font-semibold">Registro Sanitario INVIMA</span>, garantizando inocuidad alimentaria, Buenas Prácticas de Manufactura y control de calidad riguroso.</p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 {[
                   { icon: ShieldCheck, text: 'Inocuidad alimentaria comprobada' },
@@ -1042,8 +837,7 @@ function UltraGuaranteeSection() {
                   { icon: Leaf, text: 'Ingredientes verificados y seguros' },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2 text-white/60 text-xs">
-                    <item.icon className="w-3.5 h-3.5 text-[#39FF14] flex-shrink-0" />
-                    <span>{item.text}</span>
+                    <item.icon className="w-3.5 h-3.5 text-[#39FF14] flex-shrink-0" /><span>{item.text}</span>
                   </div>
                 ))}
               </div>
@@ -1054,21 +848,19 @@ function UltraGuaranteeSection() {
         {/* Guarantee pillars */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.5 }} className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
           {[
-            { icon: Truck, title: 'Recibe primero, paga después', desc: 'Pago contra entrega en toda Colombia. Solo pagas cuando tienes el producto en tus manos. Sin riesgo.' },
-            { icon: ShieldCheck, title: '100% Natural y Certificado', desc: 'Producto con Registro INVIMA vigente. Fórmula natural, sin químicos añadidos, sin gluten, sin lactosa.' },
-            { icon: Heart, title: '+5.000 clientes satisfechos', desc: 'Miles de colombianos ya transformaron su salud digestiva. Únete a la comunidad ColiPlus.' },
+            { icon: Truck, title: 'Recibe primero, paga después', desc: 'Pago contra entrega en toda Colombia. Solo pagas cuando tienes el producto en tus manos.' },
+            { icon: ShieldCheck, title: '100% Natural y Certificado', desc: 'Registro INVIMA vigente. Sin químicos añadidos, sin gluten, sin lactosa.' },
+            { icon: Heart, title: '+5.000 clientes satisfechos', desc: 'Miles de colombianos ya transformaron su salud digestiva con ColiPlus.' },
           ].map((item, i) => (
             <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 md:p-6 hover:border-[#39FF14]/15 transition-colors duration-300">
-              <div className="w-12 h-12 rounded-full bg-[#39FF14]/10 flex items-center justify-center mb-4">
-                <item.icon className="w-6 h-6 text-[#39FF14]" />
-              </div>
+              <div className="w-12 h-12 rounded-full bg-[#39FF14]/10 flex items-center justify-center mb-4"><item.icon className="w-6 h-6 text-[#39FF14]" /></div>
               <h4 className="text-white font-bold text-sm md:text-base mb-2">{item.title}</h4>
               <p className="text-white/40 text-xs md:text-sm leading-relaxed">{item.desc}</p>
             </div>
           ))}
         </motion.div>
 
-        {/* Real testimonial screenshots showcase */}
+        {/* Testimonial screenshots */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.7 }} className="bg-white/[0.02] border border-white/[0.05] rounded-3xl p-5 md:p-7">
           <div className="flex items-center gap-2 mb-5">
             <BadgeCheck className="w-4 h-4 text-[#39FF14]" />
@@ -1098,7 +890,7 @@ function UltraGuaranteeSection() {
 /* ─────────────────────────────────────────────
    FINAL CTA
    ───────────────────────────────────────────── */
-function FinalCTASection({ openWhatsApp }: { openWhatsApp: () => void }) {
+function FinalCTASection() {
   const { ref, inView } = useInView(0.1)
   return (
     <section ref={ref} className="relative py-24 md:py-36 px-4 overflow-hidden">
@@ -1106,21 +898,18 @@ function FinalCTASection({ openWhatsApp }: { openWhatsApp: () => void }) {
         <div className="absolute top-0 left-1/4 w-[400px] h-[400px] bg-[#39FF14]/[0.04] rounded-full blur-[120px]" />
         <div className="absolute bottom-0 right-1/4 w-[300px] h-[300px] bg-[#39FF14]/[0.03] rounded-full blur-[100px]" />
       </div>
-      {Array.from({ length: 15 }).map((_, i) => (
-        <div key={i} className="absolute w-1 h-1 bg-[#39FF14]/15 rounded-full pointer-events-none" style={{ left: `${(i * 7 + 3) % 100}%`, top: `${(i * 13 + 7) % 100}%`, animation: `pulse ${2 + i * 0.3}s ease-in-out infinite`, animationDelay: `${i * 0.2}s` }} />
-      ))}
       <div className="relative max-w-3xl mx-auto text-center">
         <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={inView ? { opacity: 1, scale: 1 } : {}} transition={{ duration: 0.6 }} className="mb-8">
           <img src="/coliplus.webp" alt="ColiPlus" className="w-24 h-24 md:w-32 md:h-32 mx-auto object-contain drop-shadow-[0_0_30px_rgba(57,255,20,0.2)]" />
         </motion.div>
         <motion.h2 initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.1 }} className="text-3xl md:text-5xl lg:text-6xl font-extrabold leading-tight mb-6">
-          Tu transformación <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">empieza hoy</span>
+          Tu alivio <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">empieza hoy</span>
         </motion.h2>
-        <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.2 }} className="text-white/40 text-base md:text-lg max-w-xl mx-auto mb-4">
-          No esperes un día más para sentirte bien. Paga 2 y llévate 3 tarros de ColiPlus con envío gratis a toda Colombia.
+        <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.2 }} className="text-white/45 text-base md:text-lg max-w-xl mx-auto mb-4">
+          No esperes un día más con inflamación, gases y estreñimiento. Pide tu Kit ColiPlus y siente la diferencia desde la primera semana.
         </motion.p>
 
-        {/* Gift reminder in CTA */}
+        {/* Gift reminder */}
         <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={inView ? { opacity: 1, scale: 1 } : {}} transition={{ duration: 0.5, delay: 0.25 }} className="mb-6 inline-flex items-center gap-3 px-5 py-3 rounded-2xl border border-amber-500/20 bg-amber-500/[0.06]">
           <img src="/images/termoactiva-product.jpg" alt="Loción Termoactiva obsequio" className="w-10 h-10 rounded-lg object-cover border border-amber-500/20" loading="lazy" />
           <div className="text-left">
@@ -1129,30 +918,35 @@ function FinalCTASection({ openWhatsApp }: { openWhatsApp: () => void }) {
           </div>
           <Gift className="w-5 h-5 text-amber-400 ml-1" />
         </motion.div>
+
+        {/* Price summary */}
         <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.3 }} className="mb-8">
-          <span className="text-2xl md:text-4xl font-black bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">$151.800</span>
-          <span className="text-white/30 text-sm ml-2">COP · Paga 2 Lleva 3</span>
-          <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-white/25 text-xs">
-            <span>1 und: $75.900</span>
-            <span>·</span>
-            <span>2 und: $113.850</span>
-            <span>·</span>
-            <span className="text-[#39FF14]/50 font-semibold">2x3: $151.800</span>
-            <span>·</span>
-            <span>3x5: $227.700</span>
+          <div className="flex flex-wrap items-center justify-center gap-3 text-white/30 text-sm">
+            <span>1 tarro: <span className="font-semibold text-white/50">$75.900</span></span>
+            <span className="text-white/10">·</span>
+            <span>2 tarros: <span className="font-semibold text-[#39FF14]/70">$113.850</span> <span className="text-[#39FF14]/50 text-[10px] font-bold">-25%</span></span>
+            <span className="text-white/10">·</span>
+            <span>3 tarros: <span className="font-bold text-[#39FF14]">$151.800</span> <span className="text-[#39FF14] text-[10px] font-bold">-33%</span></span>
           </div>
         </motion.div>
+
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.4 }} className="flex flex-col items-center gap-4">
-          <GlowButton onClick={openWhatsApp} className="shadow-[0_0_60px_rgba(57,255,20,0.2)]">
+          <GlowButton href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent('Hola! Quiero pedir ColiPlus + Loción GRATIS 💚')}`} className="shadow-[0_0_60px_rgba(57,255,20,0.2)]">
             <MessageCircle className="w-5 h-5" /> Pedir por WhatsApp <ArrowRight className="w-4 h-4" />
           </GlowButton>
+          <div className="flex items-center gap-2 text-white/25 text-xs">
+            <Truck className="w-3 h-3 text-[#39FF14]/50" /> Envío gratis
+            <span className="text-white/10">·</span>
+            <Banknote className="w-3 h-3 text-[#39FF14]/50" /> Pagas al recibir
+            <span className="text-white/10">·</span>
+            <ShieldCheck className="w-3 h-3 text-[#39FF14]/50" /> INVIMA
+          </div>
         </motion.div>
-        <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.7 }} className="mt-8 flex flex-wrap items-center justify-center gap-4 text-white/20 text-xs">
-          <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Promoción limitada</span>
-          <span className="flex items-center gap-1"><Truck className="w-3 h-3" /> Envío gratis</span>
-          <span className="flex items-center gap-1"><ShieldCheck className="w-3 h-3" /> Contra entrega</span>
-          <span className="flex items-center gap-1"><CreditCard className="w-3 h-3" /> Nequi · PSE · Bancolombia</span>
-          <span className="flex items-center gap-1"><Award className="w-3 h-3" /> Registro INVIMA</span>
+
+        {/* Urgency */}
+        <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.7 }} className="mt-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-red-500/10 border border-red-500/15">
+          <Clock className="w-3.5 h-3.5 text-red-400" />
+          <span className="text-red-300/80 text-xs font-medium">Oferta válida solo por hoy o hasta agotar existencias</span>
         </motion.div>
       </div>
     </section>
