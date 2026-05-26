@@ -12,9 +12,16 @@ import {
 /* ─────────────────────────────────────────────
    CONSTANTS — FULL PRODUCT DATA
    ───────────────────────────────────────────── */
-const WHATSAPP_NUMBER = '573001234567'
+const WHATSAPP_NUMBER = '573214487903'
 const WHATSAPP_MESSAGE = encodeURIComponent('Hola! Quiero aprovechar la promo Paga 2 Lleva 3 de ColiPlus + Loción Termoactiva GRATIS 💚')
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`
+
+const PRICING_TIERS = [
+  { qty: '1 Unidad', price: '$75.900', unit: '$75.900 c/u', highlight: false, msg: encodeURIComponent('Hola! Quiero comprar 1 Unidad de ColiPlus $75.900 💚') },
+  { qty: '2 Unidades', price: '$113.850', unit: '$56.925 c/u', highlight: false, savings: 'Ahorra 25%', msg: encodeURIComponent('Hola! Quiero comprar 2 Unidades de ColiPlus $113.850 💚') },
+  { qty: 'Paga 2 Lleva 3', price: '$151.800', unit: '$50.600 c/u', highlight: true, savings: 'Más popular', msg: encodeURIComponent('Hola! Quiero aprovechar la promo Paga 2 Lleva 3 de ColiPlus $151.800 + Loción Termoactiva GRATIS 💚') },
+  { qty: 'Paga 3 Lleva 5', price: '$227.700', unit: '$45.540 c/u', highlight: false, savings: 'Mejor precio', msg: encodeURIComponent('Hola! Quiero aprovechar la promo Paga 3 Lleva 5 de ColiPlus $227.700 + Loción Termoactiva GRATIS 💚') },
+]
 
 const ALL_INGREDIENTS = [
   { name: 'Noni', role: 'Desintoxicante y antioxidante' },
@@ -487,13 +494,17 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
         {/* Pricing Tiers */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.3 }} className="mt-8 md:mt-10">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-3xl mx-auto">
-            {[
-              { qty: '1 Unidad', price: '$75.900', unit: '$75.900 c/u', highlight: false },
-              { qty: '2 Unidades', price: '$113.850', unit: '$56.925 c/u', highlight: false, savings: 'Ahorra 25%' },
-              { qty: 'Paga 2 Lleva 3', price: '$151.800', unit: '$50.600 c/u', highlight: true, savings: 'Más popular' },
-              { qty: 'Paga 3 Lleva 5', price: '$227.700', unit: '$45.540 c/u', highlight: false, savings: 'Mejor precio' },
-            ].map((tier, i) => (
-              <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }} className={`relative rounded-2xl p-4 md:p-5 text-center border transition-all duration-300 cursor-pointer hover:scale-[1.03] ${tier.highlight ? 'bg-[#39FF14]/[0.08] border-[#39FF14]/40 shadow-[0_0_30px_rgba(57,255,20,0.1)]' : 'bg-white/[0.03] border-white/[0.06] hover:border-[#39FF14]/20'}`}>
+            {PRICING_TIERS.map((tier, i) => (
+              <motion.a
+                key={i}
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${tier.msg}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                initial={{ opacity: 0, y: 20 }}
+                animate={inView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
+                className={`relative rounded-2xl p-4 md:p-5 text-center border transition-all duration-300 cursor-pointer hover:scale-[1.03] block group ${tier.highlight ? 'bg-[#39FF14]/[0.08] border-[#39FF14]/40 shadow-[0_0_30px_rgba(57,255,20,0.1)]' : 'bg-white/[0.03] border-white/[0.06] hover:border-[#39FF14]/20'}`}
+              >
                 {tier.savings && (
                   <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase ${tier.highlight ? 'bg-[#39FF14] text-black' : 'bg-white/10 text-white/50 border border-white/10'}`}>
                     {tier.savings}
@@ -502,7 +513,10 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
                 <p className="text-white/50 text-[10px] md:text-xs font-medium mb-1 mt-1">{tier.qty}</p>
                 <p className={`text-2xl md:text-3xl font-black ${tier.highlight ? 'bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent' : 'text-white'}`}>{tier.price}</p>
                 <p className="text-white/25 text-[9px] md:text-[10px] mt-1">{tier.unit}</p>
-              </motion.div>
+                <div className={`mt-3 flex items-center justify-center gap-1.5 rounded-full py-1.5 px-3 text-[10px] font-bold transition-all duration-300 ${tier.highlight ? 'bg-[#39FF14] text-black group-hover:shadow-[0_0_20px_rgba(57,255,20,0.3)]' : 'bg-white/[0.08] text-white/60 group-hover:bg-[#25D366]/20 group-hover:text-white'}`}>
+                  <MessageCircle className="w-3 h-3" /> Pedir ya
+                </div>
+              </motion.a>
             ))}
           </div>
           <div className="mt-5">
@@ -824,13 +838,10 @@ function FinalCTASection({ openWhatsApp }: { openWhatsApp: () => void }) {
             <span>3x5: $227.700</span>
           </div>
         </motion.div>
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.4 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.4 }} className="flex flex-col items-center gap-4">
           <GlowButton onClick={openWhatsApp} className="shadow-[0_0_60px_rgba(57,255,20,0.2)]">
             <MessageCircle className="w-5 h-5" /> Pedir por WhatsApp <ArrowRight className="w-4 h-4" />
           </GlowButton>
-          <a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 px-6 py-3 text-white/40 hover:text-white/70 text-sm transition-colors duration-300">
-            <Phone className="w-4 h-4" /> O llámanos directamente
-          </a>
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.6, delay: 0.7 }} className="mt-8 flex flex-wrap items-center justify-center gap-4 text-white/20 text-xs">
           <span className="flex items-center gap-1"><Clock className="w-3 h-3" /> Promoción limitada</span>
