@@ -15,6 +15,8 @@ import {
 const WHATSAPP_NUMBER = '573214487903'
 const WHATSAPP_MESSAGE = encodeURIComponent('Hola! Quiero aprovechar la promo Paga 2 Lleva 3 de ColiPlus + Loción Termoactiva GRATIS 💚')
 const WHATSAPP_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_MESSAGE}`
+const WHATSAPP_GENERIC_MSG = encodeURIComponent('Hola! Quiero información sobre ColiPlus 💚')
+const WHATSAPP_GENERIC_URL = `https://wa.me/${WHATSAPP_NUMBER}?text=${WHATSAPP_GENERIC_MSG}`
 
 const PRICING_TIERS = [
   { qty: '1 Unidad', price: '$75.900', unit: '$75.900 c/u', highlight: false, msg: encodeURIComponent('Hola! Quiero comprar 1 Unidad de ColiPlus $75.900 💚') },
@@ -167,7 +169,7 @@ function FloatingWhatsApp() {
   useEffect(() => { const h = () => setVisible(window.scrollY > 300); window.addEventListener('scroll', h, { passive: true }); return () => window.removeEventListener('scroll', h) }, [])
   return (
     <AnimatePresence>{visible && (
-      <motion.a href={WHATSAPP_URL} target="_blank" rel="noopener noreferrer" initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} className="fixed bottom-6 right-6 z-50 w-14 h-14 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,211,102,0.5)] hover:shadow-[0_0_45px_rgba(37,211,102,0.7)] transition-shadow duration-300 cursor-pointer" aria-label="Contactar por WhatsApp">
+      <motion.a href={WHATSAPP_GENERIC_URL} target="_blank" rel="noopener noreferrer" initial={{ scale: 0, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0, opacity: 0 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} className="fixed bottom-6 right-6 z-50 w-14 h-14 md:w-16 md:h-16 bg-[#25D366] rounded-full flex items-center justify-center shadow-[0_0_30px_rgba(37,211,102,0.5)] hover:shadow-[0_0_45px_rgba(37,211,102,0.7)] transition-shadow duration-300 cursor-pointer" aria-label="Contactar por WhatsApp">
         <MessageCircle className="w-6 h-6 md:w-7 md:h-7 text-white" fill="white" />
         <span className="absolute inset-0 rounded-full bg-[#25D366]/30 animate-ping" />
       </motion.a>
