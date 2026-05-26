@@ -182,30 +182,48 @@ function SectionDivider() {
 }
 
 /* ─────────────────────────────────────────────
-   VIDEO SECTION
+   REUSABLE VIDEO PLAYER
    ───────────────────────────────────────────── */
-function VideoSection() {
+function VideoPlayer({
+  src,
+  label,
+  heading,
+  headingHighlight,
+  accent = 'green',
+  variant = 'default',
+}: {
+  src: string
+  label: string
+  heading: string
+  headingHighlight: string
+  accent?: 'green' | 'warm'
+  variant?: 'default' | 'personal'
+}) {
   const videoRef = useRef<HTMLVideoElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const [isMuted, setIsMuted] = useState(true)
   const [showSoundBtn, setShowSoundBtn] = useState(true)
   const [isEnded, setIsEnded] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
+  const [hasAutoPlayed, setHasAutoPlayed] = useState(false)
 
-  // Autoplay muted on mount
+  // Autoplay when in viewport (IntersectionObserver)
   useEffect(() => {
     const vid = videoRef.current
-    if (!vid) return
-    vid.muted = true
-    vid.playsInline = true
-    const playPromise = vid.play()
-    if (playPromise !== undefined) {
-      playPromise.then(() => setIsPlaying(true)).catch(() => {
-        // Autoplay blocked – show play button
-        setIsPlaying(false)
-      })
-    }
-  }, [])
+    const el = containerRef.current
+    if (!vid || !el) return
+    const obs = new IntersectionObserver(([entry]) => {
+      if (entry.isIntersecting && !hasAutoPlayed) {
+        setHasAutoPlayed(true)
+        vid.muted = true
+        vid.playsInline = true
+        vid.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+        obs.disconnect()
+      }
+    }, { threshold: 0.3 })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [hasAutoPlayed])
 
   // Activate sound: restart from 0 with audio
   const activateSound = useCallback(() => {
@@ -218,11 +236,7 @@ function VideoSection() {
       setShowSoundBtn(false)
       setIsEnded(false)
       setIsPlaying(true)
-    }).catch(() => {
-      // If autoplay with sound fails, keep muted
-      vid.muted = true
-      setIsMuted(true)
-    })
+    }).catch(() => { vid.muted = true; setIsMuted(true) })
   }, [])
 
   // Replay
@@ -230,33 +244,35 @@ function VideoSection() {
     const vid = videoRef.current
     if (!vid) return
     vid.currentTime = 0
-    vid.play().then(() => {
-      setIsEnded(false)
-      setIsPlaying(true)
-    }).catch(() => {})
+    vid.play().then(() => { setIsEnded(false); setIsPlaying(true) }).catch(() => {})
   }, [])
 
   // Video ended
-  const handleEnded = useCallback(() => {
-    setIsEnded(true)
-    setIsPlaying(false)
-  }, [])
+  const handleEnded = useCallback(() => { setIsEnded(true); setIsPlaying(false) }, [])
 
   // Pause/Play toggle
   const togglePlayPause = useCallback(() => {
     const vid = videoRef.current
     if (!vid) return
-    if (vid.paused) {
-      vid.play().then(() => setIsPlaying(true)).catch(() => {})
-    } else {
-      vid.pause()
-      setIsPlaying(false)
-    }
+    if (vid.paused) { vid.play().then(() => setIsPlaying(true)).catch(() => {}) }
+    else { vid.pause(); setIsPlaying(false) }
   }, [])
 
+  const isWarm = accent === 'warm'
+  const isPersonal = variant === 'personal'
+  const glowColor = isWarm ? 'rgba(245,158,11,0.06)' : 'rgba(57,255,20,0.06)'
+  const btnFrom = isWarm ? '#f59e0b' : '#39FF14'
+  const btnTo = isWarm ? '#d97706' : '#2bcc10'
+  const glowShadow = isWarm ? 'rgba(245,158,11,' : 'rgba(57,255,20,'
+
   return (
-    <section ref={containerRef} className="relative py-12 md:py-20 px-4">
-      <div className="max-w-4xl mx-auto">
+    <section ref={containerRef} className={`relative py-12 md:py-20 px-4 ${isPersonal ? 'overflow-hidden' : ''}`}>
+      {/* Warm radial glow for personal variant */}
+      {isPersonal && (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-amber-500/[0.03] rounded-full blur-[120px] pointer-events-none" />
+      )}
+
+      <div className={`relative mx-auto ${isPersonal ? 'max-w-lg' : 'max-w-4xl'}`}>
         {/* Section heading */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -265,10 +281,24 @@ function VideoSection() {
           transition={{ duration: 0.7 }}
           className="text-center mb-6 md:mb-8"
         >
-          <span className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-3">🎬 Mira cómo funciona</span>
-          <h2 className="text-2xl md:text-4xl font-extrabold">
-            Descubre el <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">poder de ColiPlus</span>
+          <span className={`inline-block text-xs font-bold tracking-[0.25em] uppercase mb-3 ${isWarm ? 'text-amber-400' : 'text-[#39FF14]'}`}>{label}</span>
+          <h2 className={`font-extrabold ${isPersonal ? 'text-xl md:text-3xl' : 'text-2xl md:text-4xl'}`}>
+            {heading}{' '}
+            <span className={`bg-gradient-to-r ${isWarm ? 'from-amber-400 to-amber-300' : 'from-[#39FF14] to-[#5fff47]'} bg-clip-text text-transparent`}>
+              {headingHighlight}
+            </span>
           </h2>
+          {isPersonal && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              whileInView={{ opacity: 1 }}
+              viewport={{ once: true }}
+              transition={{ delay: 0.3 }}
+              className="mt-2 text-white/35 text-sm max-w-sm mx-auto"
+            >
+              Conoce de primera mano quién está detrás de tu bienestar
+            </motion.p>
+          )}
         </motion.div>
 
         {/* Video container */}
@@ -277,18 +307,18 @@ function VideoSection() {
           whileInView={{ opacity: 1, y: 0, scale: 1 }}
           viewport={{ once: true, margin: '-30px' }}
           transition={{ duration: 0.8, delay: 0.15 }}
-          className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_60px_rgba(57,255,20,0.06)] bg-black"
+          className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 bg-black"
+          style={{ boxShadow: `0 0 60px ${glowColor}` }}
         >
           {/* Glow ring */}
-          <div className="absolute -inset-1 bg-gradient-to-r from-[#39FF14]/10 via-transparent to-[#39FF14]/10 rounded-3xl blur-sm pointer-events-none" />
+          <div className={`absolute -inset-1 bg-gradient-to-r ${isWarm ? 'from-amber-500/10 via-transparent to-amber-500/10' : 'from-[#39FF14]/10 via-transparent to-[#39FF14]/10'} rounded-3xl blur-sm pointer-events-none`} />
 
-          <div className="relative aspect-[9/16] sm:aspect-[9/14] md:aspect-video max-h-[75vh] md:max-h-none bg-black rounded-2xl md:rounded-3xl overflow-hidden">
+          <div className={`relative bg-black rounded-2xl md:rounded-3xl overflow-hidden ${isPersonal ? 'aspect-[9/16] sm:aspect-[9/14] md:aspect-[9/12] max-h-[70vh] md:max-h-[600px]' : 'aspect-[9/16] sm:aspect-[9/14] md:aspect-video max-h-[75vh] md:max-h-none'}`}>
             <video
               ref={videoRef}
-              src="/coliplus-video.mp4"
+              src={src}
               playsInline
               muted
-              autoPlay
               onEnded={handleEnded}
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
@@ -297,7 +327,7 @@ function VideoSection() {
             />
 
             {/* Dark overlay gradient at bottom for controls visibility */}
-            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
 
             {/* ─── SOUND ACTIVATE BUTTON (magic glow) ─── */}
             <AnimatePresence>
@@ -306,13 +336,16 @@ function VideoSection() {
                   initial={{ opacity: 0, scale: 0.6 }}
                   animate={{ opacity: 1, scale: 1 }}
                   exit={{ opacity: 0, scale: 0.5 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.8 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 1 }}
                   onClick={activateSound}
-                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#39FF14] to-[#2bcc10] text-black font-bold text-xs md:text-sm shadow-[0_0_30px_rgba(57,255,20,0.4)] hover:shadow-[0_0_50px_rgba(57,255,20,0.6)] transition-shadow duration-300 cursor-pointer"
+                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full text-black font-bold text-xs md:text-sm transition-shadow duration-300 cursor-pointer"
+                  style={{
+                    background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`,
+                    boxShadow: `0 0 30px ${glowShadow}0.4)`,
+                  }}
                 >
                   <Volume2 className="w-4 h-4" />
                   <span>Activar sonido</span>
-                  {/* Ping animation */}
                   <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />
                 </motion.button>
               )}
@@ -320,7 +353,7 @@ function VideoSection() {
 
             {/* ─── PAUSE INDICATOR ─── */}
             <AnimatePresence>
-              {!isPlaying && !isEnded && (
+              {!isPlaying && !isEnded && hasAutoPlayed && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -339,6 +372,23 @@ function VideoSection() {
               )}
             </AnimatePresence>
 
+            {/* ─── PLAY BUTTON (before first play) ─── */}
+            <AnimatePresence>
+              {!isPlaying && !isEnded && !hasAutoPlayed && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={togglePlayPause}
+                  className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 cursor-pointer"
+                >
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/15">
+                    <Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             {/* ─── ENDED OVERLAY (Replay) ─── */}
             <AnimatePresence>
               {isEnded && (
@@ -353,24 +403,27 @@ function VideoSection() {
                     animate={{ scale: 1, opacity: 1 }}
                     transition={{ type: 'spring', stiffness: 300, damping: 20 }}
                     onClick={handleReplay}
-                    className="flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-[#39FF14] to-[#2bcc10] text-black font-bold text-base md:text-lg shadow-[0_0_40px_rgba(57,255,20,0.3)] hover:shadow-[0_0_60px_rgba(57,255,20,0.5)] transition-shadow duration-300 cursor-pointer"
+                    className="flex items-center gap-3 px-8 py-4 rounded-full text-black font-bold text-base md:text-lg transition-shadow duration-300 cursor-pointer"
+                    style={{
+                      background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`,
+                      boxShadow: `0 0 40px ${glowShadow}0.3)`,
+                    }}
                   >
                     <RotateCcw className="w-5 h-5" />
                     Ver de nuevo
                   </motion.button>
-                  {!showSoundBtn && isMuted === false && (
+                  {!isMuted && (
                     <span className="text-white/40 text-xs">Con audio 🔊</span>
                   )}
                 </motion.div>
               )}
             </AnimatePresence>
 
-            {/* ─── BOTTOM CONTROLS (tap area for pause) ─── */}
+            {/* ─── BOTTOM CONTROLS ─── */}
             <div
               onClick={togglePlayPause}
               className="absolute bottom-0 inset-x-0 h-16 z-10 flex items-center justify-between px-4 cursor-pointer"
             >
-              {/* Mute/unmute small icon */}
               <button
                 onClick={(e) => {
                   e.stopPropagation()
@@ -384,12 +437,26 @@ function VideoSection() {
               >
                 {isMuted ? <VolumeX className="w-4 h-4 text-white/70" /> : <Volume2 className="w-4 h-4 text-[#39FF14]" />}
               </button>
-
-              {/* Progress hint */}
               <span className="text-white/30 text-[10px]">Toca para pausar</span>
             </div>
           </div>
         </motion.div>
+
+        {/* Personal variant: trust message below video */}
+        {isPersonal && (
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5, duration: 0.6 }}
+            className="mt-5 text-center"
+          >
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20">
+              <ShieldCheck className="w-3.5 h-3.5 text-amber-400" />
+              <span className="text-amber-300/80 text-xs font-medium">Producto 100% certificado · Registro INVIMA · Hecho con amor en Colombia</span>
+            </div>
+          </motion.div>
+        )}
       </div>
     </section>
   )
@@ -467,7 +534,12 @@ export default function Home() {
       </section>
 
       {/* ═══════ VIDEO ═══════ */}
-      <VideoSection />
+      <VideoPlayer
+        src="/coliplus-video.mp4"
+        label="🎬 Mira cómo funciona"
+        heading="Descubre el"
+        headingHighlight="poder de ColiPlus"
+      />
       <SectionDivider />
 
       {/* ═══════ SOCIAL PROOF BAR ═══════ */}
@@ -502,6 +574,18 @@ export default function Home() {
 
       {/* ═══════ ULTRA GUARANTEE ═══════ */}
       <UltraGuaranteeSection />
+      <SectionDivider />
+
+      {/* ═══════ WELCOME VIDEO ═══════ */}
+      <VideoPlayer
+        src="/coliplus-bienvenida.mp4"
+        label="🤝 Un mensaje para ti"
+        heading="Te damos la"
+        headingHighlight="bienvenida"
+        accent="warm"
+        variant="personal"
+      />
+      <SectionDivider />
 
       {/* ═══════ FINAL CTA ═══════ */}
       <FinalCTASection openWhatsApp={openWhatsApp} />
