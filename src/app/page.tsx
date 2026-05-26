@@ -511,7 +511,7 @@ export default function Home() {
               <GlowButton onClick={openWhatsApp}>
                 <MessageCircle className="w-5 h-5" /> Quiero mi promo 2x3 <ArrowRight className="w-4 h-4" />
               </GlowButton>
-              <span className="text-white/20 text-xs">Envío gratis · Pago contra entrega · Nequi · Bancolombia · PSE</span>
+              <span className="text-white/20 text-[10px] sm:text-[11px] md:text-xs whitespace-nowrap w-full text-center lg:text-left" style={{ fontSize: 'clamp(9px, 2.6vw, 12px)' }}>Envío gratis · Pago contra entrega · Nequi · Bancolombia · PSE</span>
             </motion.div>
 
             {/* Gift badge */}
