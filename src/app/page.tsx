@@ -6,7 +6,7 @@ import {
   MessageCircle, Truck, ShieldCheck, Leaf, Sparkles, ChevronDown, Star,
   CheckCircle2, ArrowRight, Phone, Heart, Clock, CreditCard, Banknote,
   Wallet, Building2, Smartphone, Award, BadgeCheck, Flame, Users, TrendingUp,
-  Gift, Zap
+  Gift, Zap, Volume2, VolumeX, RotateCcw, Play
 } from 'lucide-react'
 
 /* ─────────────────────────────────────────────
@@ -182,6 +182,220 @@ function SectionDivider() {
 }
 
 /* ─────────────────────────────────────────────
+   VIDEO SECTION
+   ───────────────────────────────────────────── */
+function VideoSection() {
+  const videoRef = useRef<HTMLVideoElement>(null)
+  const containerRef = useRef<HTMLDivElement>(null)
+  const [isMuted, setIsMuted] = useState(true)
+  const [showSoundBtn, setShowSoundBtn] = useState(true)
+  const [isEnded, setIsEnded] = useState(false)
+  const [isPlaying, setIsPlaying] = useState(false)
+
+  // Autoplay muted on mount
+  useEffect(() => {
+    const vid = videoRef.current
+    if (!vid) return
+    vid.muted = true
+    vid.playsInline = true
+    const playPromise = vid.play()
+    if (playPromise !== undefined) {
+      playPromise.then(() => setIsPlaying(true)).catch(() => {
+        // Autoplay blocked – show play button
+        setIsPlaying(false)
+      })
+    }
+  }, [])
+
+  // Activate sound: restart from 0 with audio
+  const activateSound = useCallback(() => {
+    const vid = videoRef.current
+    if (!vid) return
+    vid.muted = false
+    vid.currentTime = 0
+    vid.play().then(() => {
+      setIsMuted(false)
+      setShowSoundBtn(false)
+      setIsEnded(false)
+      setIsPlaying(true)
+    }).catch(() => {
+      // If autoplay with sound fails, keep muted
+      vid.muted = true
+      setIsMuted(true)
+    })
+  }, [])
+
+  // Replay
+  const handleReplay = useCallback(() => {
+    const vid = videoRef.current
+    if (!vid) return
+    vid.currentTime = 0
+    vid.play().then(() => {
+      setIsEnded(false)
+      setIsPlaying(true)
+    }).catch(() => {})
+  }, [])
+
+  // Video ended
+  const handleEnded = useCallback(() => {
+    setIsEnded(true)
+    setIsPlaying(false)
+  }, [])
+
+  // Pause/Play toggle
+  const togglePlayPause = useCallback(() => {
+    const vid = videoRef.current
+    if (!vid) return
+    if (vid.paused) {
+      vid.play().then(() => setIsPlaying(true)).catch(() => {})
+    } else {
+      vid.pause()
+      setIsPlaying(false)
+    }
+  }, [])
+
+  return (
+    <section ref={containerRef} className="relative py-12 md:py-20 px-4">
+      <div className="max-w-4xl mx-auto">
+        {/* Section heading */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: '-50px' }}
+          transition={{ duration: 0.7 }}
+          className="text-center mb-6 md:mb-8"
+        >
+          <span className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-3">🎬 Mira cómo funciona</span>
+          <h2 className="text-2xl md:text-4xl font-extrabold">
+            Descubre el <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">poder de ColiPlus</span>
+          </h2>
+        </motion.div>
+
+        {/* Video container */}
+        <motion.div
+          initial={{ opacity: 0, y: 30, scale: 0.97 }}
+          whileInView={{ opacity: 1, y: 0, scale: 1 }}
+          viewport={{ once: true, margin: '-30px' }}
+          transition={{ duration: 0.8, delay: 0.15 }}
+          className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 shadow-[0_0_60px_rgba(57,255,20,0.06)] bg-black"
+        >
+          {/* Glow ring */}
+          <div className="absolute -inset-1 bg-gradient-to-r from-[#39FF14]/10 via-transparent to-[#39FF14]/10 rounded-3xl blur-sm pointer-events-none" />
+
+          <div className="relative aspect-[9/16] sm:aspect-[9/14] md:aspect-video max-h-[75vh] md:max-h-none bg-black rounded-2xl md:rounded-3xl overflow-hidden">
+            <video
+              ref={videoRef}
+              src="/coliplus-video.mp4"
+              playsInline
+              muted
+              autoPlay
+              onEnded={handleEnded}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              className="w-full h-full object-cover"
+              preload="auto"
+            />
+
+            {/* Dark overlay gradient at bottom for controls visibility */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/70 to-transparent pointer-events-none" />
+
+            {/* ─── SOUND ACTIVATE BUTTON (magic glow) ─── */}
+            <AnimatePresence>
+              {showSoundBtn && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.8 }}
+                  onClick={activateSound}
+                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-[#39FF14] to-[#2bcc10] text-black font-bold text-xs md:text-sm shadow-[0_0_30px_rgba(57,255,20,0.4)] hover:shadow-[0_0_50px_rgba(57,255,20,0.6)] transition-shadow duration-300 cursor-pointer"
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>Activar sonido</span>
+                  {/* Ping animation */}
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            {/* ─── PAUSE INDICATOR ─── */}
+            <AnimatePresence>
+              {!isPlaying && !isEnded && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={togglePlayPause}
+                  className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 cursor-pointer"
+                >
+                  <motion.div
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20"
+                  >
+                    <Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" />
+                  </motion.div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ─── ENDED OVERLAY (Replay) ─── */}
+            <AnimatePresence>
+              {isEnded && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4"
+                >
+                  <motion.button
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    onClick={handleReplay}
+                    className="flex items-center gap-3 px-8 py-4 rounded-full bg-gradient-to-r from-[#39FF14] to-[#2bcc10] text-black font-bold text-base md:text-lg shadow-[0_0_40px_rgba(57,255,20,0.3)] hover:shadow-[0_0_60px_rgba(57,255,20,0.5)] transition-shadow duration-300 cursor-pointer"
+                  >
+                    <RotateCcw className="w-5 h-5" />
+                    Ver de nuevo
+                  </motion.button>
+                  {!showSoundBtn && isMuted === false && (
+                    <span className="text-white/40 text-xs">Con audio 🔊</span>
+                  )}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* ─── BOTTOM CONTROLS (tap area for pause) ─── */}
+            <div
+              onClick={togglePlayPause}
+              className="absolute bottom-0 inset-x-0 h-16 z-10 flex items-center justify-between px-4 cursor-pointer"
+            >
+              {/* Mute/unmute small icon */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const vid = videoRef.current
+                  if (!vid) return
+                  vid.muted = !vid.muted
+                  setIsMuted(vid.muted)
+                  if (vid.muted) setShowSoundBtn(false)
+                }}
+                className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors duration-200"
+              >
+                {isMuted ? <VolumeX className="w-4 h-4 text-white/70" /> : <Volume2 className="w-4 h-4 text-[#39FF14]" />}
+              </button>
+
+              {/* Progress hint */}
+              <span className="text-white/30 text-[10px]">Toca para pausar</span>
+            </div>
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ─────────────────────────────────────────────
    MAIN PAGE
    ───────────────────────────────────────────── */
 export default function Home() {
@@ -251,6 +465,10 @@ export default function Home() {
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}><ChevronDown className="w-4 h-4 text-[#39FF14]/30" /></motion.div>
         </motion.div>
       </section>
+
+      {/* ═══════ VIDEO ═══════ */}
+      <VideoSection />
+      <SectionDivider />
 
       {/* ═══════ SOCIAL PROOF BAR ═══════ */}
       <SocialProofBar />
