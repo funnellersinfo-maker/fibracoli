@@ -204,7 +204,7 @@ function SectionDivider() {
 }
 
 /* ─────────────────────────────────────────────
-   REUSABLE VIDEO PLAYER
+   REUSABLE VIDEO PLAYER — Always playing, never black
    ───────────────────────────────────────────── */
 function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', variant = 'default' }: { src: string; label: string; heading: string; headingHighlight: string; accent?: 'green' | 'warm'; variant?: 'default' | 'personal' }) {
   const videoRef = useRef<HTMLVideoElement>(null)
@@ -213,21 +213,58 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
   const [showSoundBtn, setShowSoundBtn] = useState(true)
   const [isEnded, setIsEnded] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
-  const [hasAutoPlayed, setHasAutoPlayed] = useState(false)
+  const [isReady, setIsReady] = useState(false)
+  const [hasActivatedAudio, setHasActivatedAudio] = useState(false)
 
+  // IntersectionObserver: auto-play when in view, pause when out
   useEffect(() => {
     const vid = videoRef.current; const el = containerRef.current
     if (!vid || !el) return
     const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && !hasAutoPlayed) { setHasAutoPlayed(true); vid.muted = true; vid.playsInline = true; vid.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false)); obs.disconnect() }
-    }, { threshold: 0.3 })
-    obs.observe(el); return () => obs.disconnect()
-  }, [hasAutoPlayed])
+      if (entry.isIntersecting) {
+        if (vid.paused && !isEnded) {
+          vid.muted = !hasActivatedAudio
+          vid.playsInline = true
+          vid.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
+        }
+      } else {
+        if (!vid.paused) { vid.pause(); setIsPlaying(false) }
+      }
+    }, { threshold: 0.15 })
+    obs.observe(el)
+    return () => obs.disconnect()
+  }, [isEnded, hasActivatedAudio])
 
-  const activateSound = useCallback(() => { const vid = videoRef.current; if (!vid) return; vid.muted = false; vid.currentTime = 0; vid.play().then(() => { setIsMuted(false); setShowSoundBtn(false); setIsEnded(false); setIsPlaying(true) }).catch(() => { vid.muted = true; setIsMuted(true) }) }, [])
-  const handleReplay = useCallback(() => { const vid = videoRef.current; if (!vid) return; vid.currentTime = 0; vid.play().then(() => { setIsEnded(false); setIsPlaying(true) }).catch(() => {}) }, [])
+  // Mark ready when video can play
+  const handleCanPlay = useCallback(() => { setIsReady(true) }, [])
+
+  // Activate sound: restart from 0 with audio
+  const activateSound = useCallback(() => {
+    const vid = videoRef.current; if (!vid) return
+    vid.muted = false; vid.currentTime = 0
+    vid.play().then(() => {
+      setIsMuted(false); setShowSoundBtn(false); setIsEnded(false); setIsPlaying(true); setHasActivatedAudio(true)
+    }).catch(() => { vid.muted = true; setIsMuted(true) })
+  }, [])
+
+  // Tap on video: first tap = activate sound + restart, later taps = toggle pause/play
+  const handleVideoTap = useCallback(() => {
+    const vid = videoRef.current; if (!vid) return
+    if (!hasActivatedAudio) {
+      activateSound()
+    } else if (vid.paused) {
+      vid.play().then(() => setIsPlaying(true)).catch(() => {})
+    } else {
+      vid.pause(); setIsPlaying(false)
+    }
+  }, [hasActivatedAudio, activateSound])
+
+  const handleReplay = useCallback(() => {
+    const vid = videoRef.current; if (!vid) return
+    vid.currentTime = 0; vid.play().then(() => { setIsEnded(false); setIsPlaying(true) }).catch(() => {})
+  }, [])
+
   const handleEnded = useCallback(() => { setIsEnded(true); setIsPlaying(false) }, [])
-  const togglePlayPause = useCallback(() => { const vid = videoRef.current; if (!vid) return; if (vid.paused) { vid.play().then(() => setIsPlaying(true)).catch(() => {}) } else { vid.pause(); setIsPlaying(false) } }, [])
 
   const isWarm = accent === 'warm'
   const isPersonal = variant === 'personal'
@@ -248,15 +285,129 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
         <motion.div initial={{ opacity: 0, y: 30, scale: 0.97 }} whileInView={{ opacity: 1, y: 0, scale: 1 }} viewport={{ once: true }} transition={{ duration: 0.8, delay: 0.15 }} className="relative rounded-2xl md:rounded-3xl overflow-hidden border border-white/10 bg-black" style={{ boxShadow: `0 0 60px ${glowColor}` }}>
           <div className={`absolute -inset-1 bg-gradient-to-r ${isWarm ? 'from-amber-500/10 via-transparent to-amber-500/10' : 'from-[#39FF14]/10 via-transparent to-[#39FF14]/10'} rounded-3xl blur-sm pointer-events-none`} />
           <div className={`relative bg-black rounded-2xl md:rounded-3xl overflow-hidden ${isPersonal ? 'aspect-[9/16] sm:aspect-[9/14] md:aspect-[9/12] max-h-[70vh] md:max-h-[600px]' : 'aspect-[9/16] sm:aspect-[9/14] md:aspect-video max-h-[75vh] md:max-h-none'}`}>
-            <video ref={videoRef} src={src} playsInline muted onEnded={handleEnded} onPlay={() => setIsPlaying(true)} onPause={() => setIsPlaying(false)} className="w-full h-full object-cover" preload="none" />
-            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none" />
-            <AnimatePresence>{showSoundBtn && (<motion.button initial={{ opacity: 0, scale: 0.6 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.5 }} transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 1 }} onClick={activateSound} className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full text-black font-bold text-xs md:text-sm cursor-pointer" style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 30px ${glowShadow}0.4)` }}><Volume2 className="w-4 h-4" /><span>Activar sonido</span><span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" /></motion.button>)}</AnimatePresence>
-            <AnimatePresence>{!isPlaying && !isEnded && hasAutoPlayed && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={togglePlayPause} className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 cursor-pointer"><div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20"><Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" /></div></motion.div>)}</AnimatePresence>
-            <AnimatePresence>{!isPlaying && !isEnded && !hasAutoPlayed && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={togglePlayPause} className="absolute inset-0 z-10 flex items-center justify-center bg-black/40 cursor-pointer"><div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center border border-white/15"><Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" /></div></motion.div>)}</AnimatePresence>
-            <AnimatePresence>{isEnded && (<motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4"><motion.button initial={{ scale: 0.5, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ type: 'spring', stiffness: 300, damping: 20 }} onClick={handleReplay} className="flex items-center gap-3 px-8 py-4 rounded-full text-black font-bold text-base md:text-lg cursor-pointer" style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 40px ${glowShadow}0.3)` }}><RotateCcw className="w-5 h-5" />Ver de nuevo</motion.button>{!isMuted && <span className="text-white/40 text-xs">Con audio 🔊</span>}</motion.div>)}</AnimatePresence>
-            <div onClick={togglePlayPause} className="absolute bottom-0 inset-x-0 h-16 z-10 flex items-center justify-between px-4 cursor-pointer">
-              <button onClick={(e) => { e.stopPropagation(); const vid = videoRef.current; if (!vid) return; vid.muted = !vid.muted; setIsMuted(vid.muted); if (vid.muted) setShowSoundBtn(false) }} className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors duration-200">{isMuted ? <VolumeX className="w-4 h-4 text-white/70" /> : <Volume2 className="w-4 h-4 text-[#39FF14]" />}</button>
-              <span className="text-white/30 text-[10px]">Toca para pausar</span>
+
+            {/* Video — always preloading, always auto-plays when in view */}
+            <video
+              ref={videoRef}
+              src={src}
+              playsInline
+              muted
+              onEnded={handleEnded}
+              onCanPlay={handleCanPlay}
+              onPlay={() => setIsPlaying(true)}
+              onPause={() => setIsPlaying(false)}
+              className="w-full h-full object-cover"
+              preload="auto"
+            />
+
+            {/* Blur loading overlay — shows while video loads, reveals when playing */}
+            <AnimatePresence>
+              {!isReady && (
+                <motion.div
+                  initial={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.6 }}
+                  className="absolute inset-0 z-10 bg-gradient-to-br from-white/[0.04] via-white/[0.02] to-transparent backdrop-blur-2xl flex items-center justify-center"
+                >
+                  <div className="flex flex-col items-center gap-3">
+                    <div className="w-10 h-10 rounded-full border-2 border-white/10 border-t-[#39FF14]/60 animate-spin" />
+                    <span className="text-white/30 text-xs">Cargando video…</span>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Soft blur veil over the muted video — fades away once audio is activated */}
+            <AnimatePresence>
+              {isReady && isPlaying && isMuted && !hasActivatedAudio && (
+                <motion.div
+                  initial={{ opacity: 0.6 }}
+                  animate={{ opacity: 0.25 }}
+                  exit={{ opacity: 0 }}
+                  transition={{ duration: 0.8, ease: 'easeOut' }}
+                  className="absolute inset-0 z-[5] bg-black/10 backdrop-blur-[2px] pointer-events-none"
+                />
+              )}
+            </AnimatePresence>
+
+            <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-[6]" />
+
+            {/* "Activar sonido" floating button */}
+            <AnimatePresence>
+              {showSoundBtn && isPlaying && (
+                <motion.button
+                  initial={{ opacity: 0, scale: 0.6 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.5 }}
+                  transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.8 }}
+                  onClick={(e) => { e.stopPropagation(); activateSound() }}
+                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full text-black font-bold text-xs md:text-sm cursor-pointer"
+                  style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 30px ${glowShadow}0.4)` }}
+                >
+                  <Volume2 className="w-4 h-4" />
+                  <span>Activar sonido</span>
+                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />
+                </motion.button>
+              )}
+            </AnimatePresence>
+
+            {/* Tap overlay — tap anywhere to activate sound or toggle pause/play */}
+            {!isEnded && isReady && (
+              <div onClick={handleVideoTap} className="absolute inset-0 z-10 cursor-pointer" />
+            )}
+
+            {/* Paused overlay — shows play icon when paused (not ended) */}
+            <AnimatePresence>
+              {!isPlaying && !isEnded && isReady && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  onClick={handleVideoTap}
+                  className="absolute inset-0 z-10 flex items-center justify-center bg-black/30 cursor-pointer"
+                >
+                  <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-white/20 backdrop-blur-sm flex items-center justify-center border border-white/20">
+                    <Play className="w-7 h-7 md:w-9 md:h-9 text-white ml-1" fill="white" />
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Ended overlay — "Ver de nuevo" */}
+            <AnimatePresence>
+              {isEnded && (
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4"
+                >
+                  <motion.button
+                    initial={{ scale: 0.5, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+                    onClick={handleReplay}
+                    className="flex items-center gap-3 px-8 py-4 rounded-full text-black font-bold text-base md:text-lg cursor-pointer"
+                    style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 40px ${glowShadow}0.3)` }}
+                  >
+                    <RotateCcw className="w-5 h-5" />Ver de nuevo
+                  </motion.button>
+                  {!isMuted && <span className="text-white/40 text-xs">Con audio 🔊</span>}
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            {/* Bottom controls bar */}
+            <div className="absolute bottom-0 inset-x-0 h-16 z-[15] flex items-center justify-between px-4 pointer-events-none">
+              <button onClick={(e) => {
+                e.stopPropagation()
+                const vid = videoRef.current; if (!vid) return
+                vid.muted = !vid.muted; setIsMuted(vid.muted)
+                if (!vid.muted) { setShowSoundBtn(false); setHasActivatedAudio(true) }
+              }} className="w-9 h-9 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center hover:bg-white/20 transition-colors duration-200 pointer-events-auto cursor-pointer">
+                {isMuted ? <VolumeX className="w-4 h-4 text-white/70" /> : <Volume2 className="w-4 h-4 text-[#39FF14]" />}
+              </button>
+              <span className="text-white/30 text-[10px]">{hasActivatedAudio ? 'Toca para pausar' : 'Toca para activar sonido'}</span>
             </div>
           </div>
         </motion.div>
