@@ -323,7 +323,7 @@ function VideoPlayer({
               onPlay={() => setIsPlaying(true)}
               onPause={() => setIsPlaying(false)}
               className="w-full h-full object-cover"
-              preload="auto"
+              preload="none"
             />
 
             {/* Dark overlay gradient at bottom for controls visibility */}
@@ -473,7 +473,7 @@ export default function Home() {
   const openWhatsApp = useCallback(() => { window.open(WHATSAPP_URL, '_blank', 'noopener,noreferrer') }, [])
 
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
+    <main className="min-h-screen bg-black text-white overflow-x-hidden">
 
       {/* ═══════ HERO ═══════ */}
       <section ref={heroRef} className="relative min-h-screen overflow-hidden">
@@ -607,7 +607,7 @@ export default function Home() {
       </footer>
 
       <FloatingWhatsApp />
-    </div>
+    </main>
   )
 }
 
