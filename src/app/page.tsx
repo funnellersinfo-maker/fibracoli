@@ -321,15 +321,15 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
               )}
             </AnimatePresence>
 
-            {/* Soft blur veil over the muted video — 5% opacity, barely perceptible */}
+            {/* Soft blur veil over the muted video — 1% barely there */}
             <AnimatePresence>
               {isReady && isPlaying && isMuted && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.5, ease: 'easeOut' }}
-                  className="absolute inset-0 z-[5] bg-black/[0.03] backdrop-blur-[0.3px] pointer-events-none"
+                  transition={{ duration: 0.4, ease: 'easeOut' }}
+                  className="absolute inset-0 z-[5] bg-black/[0.01] backdrop-blur-[0.15px] pointer-events-none"
                 />
               )}
             </AnimatePresence>
