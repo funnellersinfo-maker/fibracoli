@@ -259,9 +259,13 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
     }
   }, [hasActivatedAudio, activateSound])
 
+  // Replay: restart muted (back to 5% blur + sound button), loop forever
   const handleReplay = useCallback(() => {
     const vid = videoRef.current; if (!vid) return
-    vid.currentTime = 0; vid.play().then(() => { setIsEnded(false); setIsPlaying(true) }).catch(() => {})
+    vid.muted = true; vid.currentTime = 0
+    vid.play().then(() => {
+      setIsMuted(true); setShowSoundBtn(true); setIsEnded(false); setIsPlaying(true); setHasActivatedAudio(false)
+    }).catch(() => {})
   }, [])
 
   const handleEnded = useCallback(() => { setIsEnded(true); setIsPlaying(false) }, [])
@@ -317,24 +321,24 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
               )}
             </AnimatePresence>
 
-            {/* Soft blur veil over the muted video — fades away once audio is activated */}
+            {/* Soft blur veil over the muted video — 5% opacity, barely perceptible */}
             <AnimatePresence>
-              {isReady && isPlaying && isMuted && !hasActivatedAudio && (
+              {isReady && isPlaying && isMuted && (
                 <motion.div
-                  initial={{ opacity: 0.6 }}
-                  animate={{ opacity: 0.25 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  transition={{ duration: 0.8, ease: 'easeOut' }}
-                  className="absolute inset-0 z-[5] bg-black/10 backdrop-blur-[2px] pointer-events-none"
+                  transition={{ duration: 0.5, ease: 'easeOut' }}
+                  className="absolute inset-0 z-[5] bg-black/[0.03] backdrop-blur-[0.3px] pointer-events-none"
                 />
               )}
             </AnimatePresence>
 
             <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-[6]" />
 
-            {/* "Activar sonido" — MEGA button centered, bouncing, impossible to miss */}
+            {/* "Activar sonido" / "Repetir" — MEGA button centered, bouncing, impossible to miss */}
             <AnimatePresence>
-              {showSoundBtn && isPlaying && (
+              {showSoundBtn && isPlaying && !isEnded && (
                 <motion.div
                   initial={{ opacity: 0, scale: 0.3 }}
                   animate={{ opacity: 1, scale: 1, y: [0, -12, 0, -6, 0] }}
@@ -364,7 +368,7 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
                     <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent rounded-t-3xl pointer-events-none" />
 
                     <Volume2 className="w-7 h-7 md:w-9 md:h-9 relative z-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]" />
-                    <span className="relative z-10 text-black drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)]">Activar sonido</span>
+                    <span className="relative z-10 text-black drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)]">{hasActivatedAudio ? 'Repetir' : 'Activar sonido'}</span>
                     <span className="relative z-10 text-black/60 text-[10px] md:text-xs font-semibold">Toca aquí</span>
                   </button>
                 </motion.div>
@@ -393,26 +397,17 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
               )}
             </AnimatePresence>
 
-            {/* Ended overlay — "Ver de nuevo" */}
+            {/* Ended overlay — auto-loop back to muted with "Repetir" button */}
             <AnimatePresence>
               {isEnded && (
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
-                  className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/60 backdrop-blur-sm gap-4"
+                  onAnimationComplete={() => { if (isEnded) handleReplay() }}
+                  className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/30 gap-3 pointer-events-none"
                 >
-                  <motion.button
-                    initial={{ scale: 0.5, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                    onClick={handleReplay}
-                    className="flex items-center gap-3 px-8 py-4 rounded-full text-black font-bold text-base md:text-lg cursor-pointer"
-                    style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 40px ${glowShadow}0.3)` }}
-                  >
-                    <RotateCcw className="w-5 h-5" />Ver de nuevo
-                  </motion.button>
-                  {!isMuted && <span className="text-white/40 text-xs">Con audio 🔊</span>}
+                  <span className="text-white/50 text-sm font-medium animate-pulse">Reproduciendo de nuevo…</span>
                 </motion.div>
               )}
             </AnimatePresence>
