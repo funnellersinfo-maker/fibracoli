@@ -40,14 +40,14 @@ const KITS = [
   },
   {
     id: 'familiar',
-    name: 'Kit Familiar',
+    name: 'Paga 2 Lleva 3',
     qty: '3 Tarros',
-    price: '$151.800',
-    unitPrice: '$50.600 c/u',
-    highlight: false,
-    tag: 'Mejor Precio',
-    savings: 'Ahorra 33%',
-    msg: encodeURIComponent('Hola! Quiero el Kit Familiar de 3 Tarros de ColiPlus $151.800 + Loción GRATIS 💚'),
+    price: '$159.800',
+    unitPrice: '$53.267 c/u',
+    highlight: true,
+    tag: '🔥 Mejor Oferta',
+    savings: '¡1 GRATIS!',
+    msg: encodeURIComponent('Hola! Quiero la oferta Paga 2 Lleva 3 de ColiPlus $159.800 + Loción GRATIS 💚'),
   },
 ]
 
@@ -796,19 +796,19 @@ function OfferSection() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={inView ? { opacity: 1, y: 0 } : {}}
                 transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }}
-                className={`relative rounded-2xl p-5 md:p-6 text-center border transition-all duration-300 cursor-pointer hover:scale-[1.03] block group ${kit.highlight ? 'bg-[#39FF14]/[0.08] border-[#39FF14]/40 shadow-[0_0_40px_rgba(57,255,20,0.12)] ring-2 ring-[#39FF14]/20' : 'bg-white/[0.03] border-white/[0.06] hover:border-[#39FF14]/20'}`}
+                className={`relative rounded-2xl p-5 md:p-6 text-center border transition-all duration-300 cursor-pointer hover:scale-[1.03] block group ${kit.highlight ? kit.id === 'familiar' ? 'bg-[#39FF14]/[0.10] border-[#39FF14]/50 shadow-[0_0_50px_rgba(57,255,20,0.18)] ring-2 ring-[#39FF14]/30 md:scale-105' : 'bg-[#39FF14]/[0.08] border-[#39FF14]/40 shadow-[0_0_40px_rgba(57,255,20,0.12)] ring-2 ring-[#39FF14]/20' : 'bg-white/[0.03] border-white/[0.06] hover:border-[#39FF14]/20'}`}
               >
                 {kit.tag && (
-                  <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-[10px] font-black tracking-wide uppercase ${kit.highlight ? 'bg-[#39FF14] text-black shadow-[0_0_15px_rgba(57,255,20,0.4)]' : 'bg-white/10 text-white/50 border border-white/10'}`}>
+                  <span className={`absolute -top-3 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full font-black tracking-wide uppercase ${kit.id === 'familiar' ? 'text-xs bg-gradient-to-r from-[#39FF14] to-[#5fff47] text-black shadow-[0_0_20px_rgba(57,255,20,0.5)]' : kit.highlight ? 'bg-[#39FF14] text-black text-[10px] shadow-[0_0_15px_rgba(57,255,20,0.4)]' : 'bg-white/10 text-white/50 border border-white/10 text-[10px]'}`}>
                     {kit.tag}
                   </span>
                 )}
-                <p className="text-white/40 text-[10px] md:text-xs font-bold tracking-wider uppercase mb-1 mt-1">{kit.name}</p>
+                <p className={`text-[10px] md:text-xs font-bold tracking-wider uppercase mb-1 mt-1 ${kit.id === 'familiar' ? 'text-[#39FF14]' : 'text-white/40'}`}>{kit.name}</p>
                 <p className="text-white/50 text-xs md:text-sm mb-2">{kit.qty}</p>
-                <p className={`text-3xl md:text-4xl font-black ${kit.highlight ? 'bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent' : 'text-white'}`}>{kit.price}</p>
+                <p className={`font-black ${kit.id === 'familiar' ? 'text-4xl md:text-5xl' : 'text-3xl md:text-4xl'} ${kit.highlight ? 'bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent' : 'text-white'}`}>{kit.price}</p>
                 <p className="text-white/30 text-[10px] md:text-xs mt-1">{kit.unitPrice}</p>
                 {kit.savings && (
-                  <span className="inline-block mt-2 px-3 py-0.5 rounded-full bg-[#39FF14]/10 text-[#39FF14] text-[10px] font-bold">{kit.savings}</span>
+                  <span className={`inline-block mt-2 px-3 py-1 rounded-full font-bold ${kit.id === 'familiar' ? 'bg-[#39FF14]/20 text-[#39FF14] text-xs ring-1 ring-[#39FF14]/30' : 'bg-[#39FF14]/10 text-[#39FF14] text-[10px]'}`}>{kit.savings}</span>
                 )}
 
                 {/* CTA button inside card */}
@@ -1095,7 +1095,7 @@ function FinalCTASection() {
             <span className="text-white/10">·</span>
             <span>2 tarros: <span className="font-semibold text-[#39FF14]/70">$113.850</span> <span className="text-[#39FF14]/50 text-[10px] font-bold">-25%</span></span>
             <span className="text-white/10">·</span>
-            <span>3 tarros: <span className="font-bold text-[#39FF14]">$151.800</span> <span className="text-[#39FF14] text-[10px] font-bold">-33%</span></span>
+            <span>Paga 2 Lleva 3: <span className="font-bold text-[#39FF14]">$159.800</span> <span className="text-[#39FF14] text-[10px] font-bold">¡1 GRATIS!</span></span>
           </div>
         </motion.div>
 
