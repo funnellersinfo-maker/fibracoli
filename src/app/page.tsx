@@ -60,6 +60,7 @@ const PAYMENT_METHODS = [
   { icon: CreditCard, label: 'Tarjeta Crédito/Débito', desc: 'Visa · Mastercard · AMEX' },
   { icon: Smartphone, label: 'Nequi · Daviplata', desc: 'Pago digital rápido' },
   { icon: Building2, label: 'PSE · Bancolombia', desc: 'Transferencia segura' },
+  { icon: Wallet, label: 'Bre-B', desc: 'Pago digital seguro' },
   { icon: Banknote, label: 'Efecty · Baloto', desc: 'Pago en efectivo' },
 ]
 
