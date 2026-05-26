@@ -144,7 +144,7 @@ function FloatingProduct({ scrollProgress }: { scrollProgress: number }) {
     <motion.div className="pointer-events-none select-none relative" style={{ x, scale: Math.max(scale, 0.3), opacity }} animate={{ y: [0, -14, 0] }} transition={{ y: { duration: 3.5, repeat: Infinity, ease: 'easeInOut' }, x: { duration: 0 }, scale: { duration: 0 }, opacity: { duration: 0 } }}>
       <div className="absolute inset-0 rounded-full bg-[#39FF14]/5 blur-[60px] scale-150" />
       <div className="absolute inset-0 rounded-full bg-[#39FF14]/10 blur-[30px] scale-125" />
-      <img src="/coliplus.webp" alt="ColiPlus - Suplemento natural para desintoxicar el colon" className="relative z-10 w-[220px] h-[220px] sm:w-[280px] sm:h-[280px] md:w-[340px] md:h-[340px] lg:w-[400px] lg:h-[400px] object-contain drop-shadow-[0_0_60px_rgba(57,255,20,0.25)]" loading="eager" />
+      <img src="/coliplus.webp" alt="ColiPlus - Suplemento natural para desintoxicar el colon" className="relative z-10 w-[160px] h-[160px] sm:w-[220px] sm:h-[220px] md:w-[340px] md:h-[340px] lg:w-[400px] lg:h-[400px] object-contain drop-shadow-[0_0_60px_rgba(57,255,20,0.25)]" loading="eager" />
     </motion.div>
   )
 }
@@ -489,7 +489,7 @@ export default function Home() {
         </div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-[#39FF14]/[0.03] rounded-full blur-[150px] pointer-events-none" />
 
-        <div className="relative z-10 min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-4 lg:gap-0 px-4 md:px-8 lg:px-16 pt-20 md:pt-24 pb-12">
+        <div className="relative z-10 min-h-screen flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-4 lg:gap-0 px-4 md:px-8 lg:px-16 pt-20 md:pt-24 pb-24 md:pb-12">
           <div className="flex flex-col items-center lg:items-start text-center lg:text-left max-w-xl lg:max-w-2xl">
             <motion.div initial={{ opacity: 0, y: -20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, delay: 0.1 }} className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#39FF14]/20 bg-[#39FF14]/5 mb-5 md:mb-6">
               <BadgeCheck className="w-3.5 h-3.5 text-[#39FF14]" />
@@ -529,7 +529,7 @@ export default function Home() {
           </motion.div>
         </div>
 
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2, duration: 1 }} className="absolute bottom-14 md:bottom-16 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2, duration: 1 }} className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2">
           <span className="text-white/15 text-[10px] tracking-[0.3em] uppercase">Descubre más</span>
           <motion.div animate={{ y: [0, 8, 0] }} transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}><ChevronDown className="w-4 h-4 text-[#39FF14]/30" /></motion.div>
         </motion.div>
