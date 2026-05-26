@@ -332,22 +332,42 @@ function VideoPlayer({ src, label, heading, headingHighlight, accent = 'green', 
 
             <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/80 via-black/40 to-transparent pointer-events-none z-[6]" />
 
-            {/* "Activar sonido" floating button */}
+            {/* "Activar sonido" — MEGA button centered, bouncing, impossible to miss */}
             <AnimatePresence>
               {showSoundBtn && isPlaying && (
-                <motion.button
-                  initial={{ opacity: 0, scale: 0.6 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.5 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20, delay: 0.8 }}
-                  onClick={(e) => { e.stopPropagation(); activateSound() }}
-                  className="absolute top-4 right-4 z-20 flex items-center gap-2 px-4 py-2.5 rounded-full text-black font-bold text-xs md:text-sm cursor-pointer"
-                  style={{ background: `linear-gradient(to right, ${btnFrom}, ${btnTo})`, boxShadow: `0 0 30px ${glowShadow}0.4)` }}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.3 }}
+                  animate={{ opacity: 1, scale: 1, y: [0, -12, 0, -6, 0] }}
+                  exit={{ opacity: 0, scale: 0.5, y: 0 }}
+                  transition={{
+                    opacity: { duration: 0.4 },
+                    scale: { type: 'spring', stiffness: 300, damping: 18, delay: 0.6 },
+                    y: { duration: 1.8, delay: 1.4, repeat: Infinity, ease: 'easeInOut' },
+                  }}
+                  className="absolute inset-0 z-20 flex flex-col items-center justify-center pointer-events-none"
                 >
-                  <Volume2 className="w-4 h-4" />
-                  <span>Activar sonido</span>
-                  <span className="absolute -top-1 -right-1 w-3 h-3 bg-white rounded-full animate-ping" />
-                </motion.button>
+                  {/* Glow ring pulsing behind the button */}
+                  <span className="absolute w-32 h-32 md:w-40 md:h-40 rounded-full animate-ping" style={{ background: `${glowShadow}0.12)` }} />
+                  <span className="absolute w-28 h-28 md:w-36 md:h-36 rounded-full animate-pulse" style={{ background: `${glowShadow}0.18)`, filter: 'blur(8px)' }} />
+
+                  <button
+                    onClick={(e) => { e.stopPropagation(); activateSound() }}
+                    className="relative pointer-events-auto cursor-pointer flex flex-col items-center justify-center gap-1.5 px-7 py-5 md:px-10 md:py-6 rounded-2xl md:rounded-3xl font-extrabold text-base md:text-xl overflow-hidden"
+                    style={{
+                      background: `linear-gradient(135deg, ${btnFrom}, ${btnTo})`,
+                      boxShadow: `0 0 40px ${glowShadow}0.5), 0 0 80px ${glowShadow}0.25), 0 8px 32px rgba(0,0,0,0.4)`,
+                    }}
+                  >
+                    {/* Shine sweep reflection */}
+                    <span className="absolute inset-0 -translate-x-full animate-[shineSweep_2.5s_ease-in-out_infinite] bg-gradient-to-r from-transparent via-white/40 to-transparent skew-x-[-20deg]" />
+                    {/* Top reflection highlight */}
+                    <span className="absolute inset-x-0 top-0 h-1/2 bg-gradient-to-b from-white/25 to-transparent rounded-t-3xl pointer-events-none" />
+
+                    <Volume2 className="w-7 h-7 md:w-9 md:h-9 relative z-10 drop-shadow-[0_2px_8px_rgba(0,0,0,0.3)]" />
+                    <span className="relative z-10 text-black drop-shadow-[0_1px_4px_rgba(0,0,0,0.2)]">Activar sonido</span>
+                    <span className="relative z-10 text-black/60 text-[10px] md:text-xs font-semibold">Toca aquí</span>
+                  </button>
+                </motion.div>
               )}
             </AnimatePresence>
 

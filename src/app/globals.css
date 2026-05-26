@@ -151,6 +151,13 @@
   100% { background-position: -200% center; }
 }
 
+/* Shine sweep for video sound button */
+@keyframes shineSweep {
+  0% { transform: translateX(-100%) skewX(-20deg); }
+  60% { transform: translateX(120%) skewX(-20deg); }
+  100% { transform: translateX(120%) skewX(-20deg); }
+}
+
 /* Custom smooth pulse for particles */
 @keyframes particle-pulse {
   0%, 100% { opacity: 0.15; transform: scale(1); }
