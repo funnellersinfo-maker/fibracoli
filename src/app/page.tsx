@@ -822,6 +822,9 @@ function OfferSection() {
                   <span className="text-white/10">·</span>
                   <Banknote className="w-3 h-3" /> Pagas al recibir
                 </div>
+
+                {/* Micro-copy: confianza de pago local */}
+                <p className="mt-2 text-white/30 text-[10px] md:text-xs text-center leading-snug">📦 Envío gratis hoy. Pagas en efectivo al recibir en la puerta de tu casa.</p>
               </motion.a>
             ))}
           </div>
