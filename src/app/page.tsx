@@ -273,6 +273,9 @@ export default function Home() {
       <TestimonialsSection />
       <SectionDivider />
 
+      {/* ═══════ ULTRA GUARANTEE ═══════ */}
+      <UltraGuaranteeSection />
+
       {/* ═══════ FINAL CTA ═══════ */}
       <FinalCTASection openWhatsApp={openWhatsApp} />
 
@@ -481,18 +484,30 @@ function OfferSection({ openWhatsApp }: { openWhatsApp: () => void }) {
         <motion.h2 initial={{ opacity: 0, y: 30, scale: 0.95 }} animate={inView ? { opacity: 1, y: 0, scale: 1 } : {}} transition={{ duration: 0.7, delay: 0.1 }} className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight">Paga 2 Lleva 3</motion.h2>
         <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.25 }} className="mt-2 text-white/40 text-sm md:text-base">3 tarros de ColiPlus · 450g c/u · Sabor Manzana Verde · 25 porciones por tarro</motion.p>
 
+        {/* Pricing Tiers */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.3 }} className="mt-8 md:mt-10">
-          <div className="inline-flex flex-col items-center gap-1">
-            <span className="text-white/30 text-base md:text-lg line-through">$227.400 COP</span>
-            <div className="relative">
-              <span className="text-5xl md:text-7xl lg:text-[5.5rem] font-black bg-gradient-to-r from-[#39FF14] via-[#5fff47] to-[#39FF14] bg-clip-text text-transparent">$151.800</span>
-              <div className="absolute inset-0 bg-[#39FF14]/10 blur-[40px] rounded-full -z-10" />
-            </div>
-            <span className="text-white/40 text-sm md:text-base">COP por 3 tarros</span>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 max-w-3xl mx-auto">
+            {[
+              { qty: '1 Unidad', price: '$75.900', unit: '$75.900 c/u', highlight: false },
+              { qty: '2 Unidades', price: '$113.850', unit: '$56.925 c/u', highlight: false, savings: 'Ahorra 25%' },
+              { qty: 'Paga 2 Lleva 3', price: '$151.800', unit: '$50.600 c/u', highlight: true, savings: 'Más popular' },
+              { qty: 'Paga 3 Lleva 5', price: '$227.700', unit: '$45.540 c/u', highlight: false, savings: 'Mejor precio' },
+            ].map((tier, i) => (
+              <motion.div key={i} initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.5, delay: 0.4 + i * 0.1 }} className={`relative rounded-2xl p-4 md:p-5 text-center border transition-all duration-300 cursor-pointer hover:scale-[1.03] ${tier.highlight ? 'bg-[#39FF14]/[0.08] border-[#39FF14]/40 shadow-[0_0_30px_rgba(57,255,20,0.1)]' : 'bg-white/[0.03] border-white/[0.06] hover:border-[#39FF14]/20'}`}>
+                {tier.savings && (
+                  <span className={`absolute -top-2.5 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[9px] font-bold tracking-wide uppercase ${tier.highlight ? 'bg-[#39FF14] text-black' : 'bg-white/10 text-white/50 border border-white/10'}`}>
+                    {tier.savings}
+                  </span>
+                )}
+                <p className="text-white/50 text-[10px] md:text-xs font-medium mb-1 mt-1">{tier.qty}</p>
+                <p className={`text-2xl md:text-3xl font-black ${tier.highlight ? 'bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent' : 'text-white'}`}>{tier.price}</p>
+                <p className="text-white/25 text-[9px] md:text-[10px] mt-1">{tier.unit}</p>
+              </motion.div>
+            ))}
           </div>
-          <div className="mt-4">
+          <div className="mt-5">
             <span className="inline-flex items-center gap-1.5 px-5 py-2 rounded-full bg-[#39FF14]/10 border border-[#39FF14]/20 text-[#39FF14] text-sm font-semibold">
-              <Sparkles className="w-3.5 h-3.5" /> Cada unidad a solo $50.600 COP
+              <Sparkles className="w-3.5 h-3.5" /> + Loción Termoactiva GRATIS en toda compra
             </span>
           </div>
         </motion.div>
@@ -600,14 +615,16 @@ function PaymentMethodsSection() {
 function TestimonialsSection() {
   const { ref, inView } = useInView(0.1)
   const testimonials = [
-    { name: 'Carolina M.', location: 'Bogotá', text: 'Después de 2 semanas sentí la diferencia. Ya no me despierto hinchada y mi digestión es otra cosa. ¡Lo recomiendo 100%!', stars: 5, time: 'Hace 2 semanas', verified: true },
-    { name: 'Andrés P.', location: 'Medellín', text: 'Pensé que era otro producto más, pero ColiPlus de verdad funciona. Llevo 3 meses y mi energía cambió por completo. El sabor manzana es riquísimo.', stars: 5, time: 'Hace 1 mes', verified: true },
-    { name: 'Luz D.', location: 'Cali', text: 'El sabor es delicioso y se prepara en segundos. Lo tomo todas las mañanas y mi tránsito intestinal es perfecto ahora. Pago contra entrega, súper fácil.', stars: 5, time: 'Hace 3 semanas', verified: true },
-    { name: 'María J.', location: 'Barranquilla', text: 'Yo estaba cansada de sentirme inflamada y pesada. Desde la primera cucharada de Coliplus empecé a sentir alivio. ¡Se me quitaron los gases!', stars: 5, time: 'Hace 5 días', verified: true },
+    { name: 'Gustavo A. Sabogal', text: 'Excelente producto la verdad lo recomiendo me ayudó mucho con mi ansiedad y estreñimiento y de paso baje de peso gracias', stars: 5, time: '13 sem', verified: true, screenshot: '/images/testimonio-3.jpg' },
+    { name: 'María Isabel Mendoza', text: 'Llevo tres días tomándolo excelente lo recomiendo gracias por tan buen producto', stars: 5, time: '12 sem', verified: true, screenshot: '/images/testimonio-2.jpg' },
+    { name: 'Juan Gabriel Mendoza', text: 'Es super pero super bueno tenía 90 kilos de peso y en 15 días baje a 84 kilos', stars: 5, time: '11 sem', verified: true, screenshot: '/images/testimonio-4.jpg' },
+    { name: 'Licencia Sabogal', text: 'Al fin un producto que me ayudó a aliviar mi estreñimiento, sobrepeso y ansiedades lo recomiendo muy bueno', stars: 5, time: '12 sem', verified: true, screenshot: '/images/testimonio-1.jpg' },
+    { name: 'Esmeralda Ruiz', text: 'Muy buen producto, son muy puntuales con la entrega', stars: 5, time: '38 sem', verified: true, screenshot: null },
+    { name: 'Irene Arroyo', text: 'Realmente es muy bueno, me ha ayudado mucho gracias Dios y gracias a sus creadores esto es una bendición', stars: 5, time: '1 sem', verified: true, screenshot: null },
   ]
   return (
     <section ref={ref} className="relative py-20 md:py-28 px-4">
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="text-center mb-14">
           <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">Resultados reales</motion.span>
           <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl md:text-5xl font-extrabold">
@@ -615,27 +632,146 @@ function TestimonialsSection() {
           </motion.h2>
           <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="mt-3 flex items-center justify-center gap-2">
             <div className="flex gap-0.5">{Array.from({ length: 5 }).map((_, i) => <Star key={i} className="w-4 h-4 text-[#39FF14] fill-[#39FF14]" />)}</div>
-            <span className="text-white/30 text-sm">4.8/5 · +5.000 clientes</span>
+            <span className="text-white/30 text-sm">11.8K me gusta en Facebook · +5.000 clientes</span>
           </motion.div>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {testimonials.map((t, i) => (
-            <motion.div key={i} initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }} animate={inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}} transition={{ duration: 0.6, delay: 0.2 + i * 0.12 }} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 hover:border-[#39FF14]/15 transition-colors duration-300">
-              <div className="flex gap-0.5 mb-3">{Array.from({ length: t.stars }).map((_, si) => <Star key={si} className="w-3.5 h-3.5 text-[#39FF14] fill-[#39FF14]" />)}</div>
+            <motion.div key={i} initial={{ opacity: 0, y: 40, filter: 'blur(10px)' }} animate={inView ? { opacity: 1, y: 0, filter: 'blur(0px)' } : {}} transition={{ duration: 0.6, delay: 0.2 + i * 0.1 }} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 hover:border-[#39FF14]/15 transition-colors duration-300">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="flex gap-0.5">{Array.from({ length: t.stars }).map((_, si) => <Star key={si} className="w-3.5 h-3.5 text-[#39FF14] fill-[#39FF14]" />)}</div>
+                {t.verified && <BadgeCheck className="w-3.5 h-3.5 text-[#39FF14]" />}
+              </div>
               <p className="text-white/55 text-sm leading-relaxed mb-4">&ldquo;{t.text}&rdquo;</p>
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="flex items-center gap-1.5">
-                    <p className="text-white font-semibold text-xs">{t.name}</p>
-                    {t.verified && <BadgeCheck className="w-3 h-3 text-[#39FF14]" />}
-                  </div>
-                  <p className="text-white/25 text-[10px]">{t.location}</p>
+                  <p className="text-white font-semibold text-xs">{t.name}</p>
+                  <span className="text-white/15 text-[9px]">Compra verificada · {t.time}</span>
                 </div>
-                <span className="text-white/15 text-[9px]">{t.time}</span>
               </div>
+              {t.screenshot && (
+                <div className="mt-3 pt-3 border-t border-white/[0.04]">
+                  <img src={t.screenshot} alt={`Reseña de ${t.name}`} className="w-full rounded-lg border border-white/[0.06] opacity-70 hover:opacity-100 transition-opacity duration-300" loading="lazy" />
+                </div>
+              )}
             </motion.div>
           ))}
         </div>
+        {/* Facebook social proof image */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 1 }} className="mt-8 max-w-2xl mx-auto">
+          <div className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-4 hover:border-[#39FF14]/15 transition-colors duration-300">
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-6 h-6 rounded-full bg-blue-500/20 flex items-center justify-center">
+                <span className="text-blue-400 text-[10px] font-bold">f</span>
+              </div>
+              <span className="text-white/40 text-xs font-medium">Prueba social en Facebook</span>
+              <span className="text-white/20 text-[10px]">11.8K me gusta</span>
+            </div>
+            <img src="/images/testimonio-facebook.jpg" alt="Reseñas de ColiPlus en Facebook" className="w-full rounded-xl border border-white/[0.06]" loading="lazy" />
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
+
+/* ─────────────────────────────────────────────
+   ULTRA GUARANTEE SECTION
+   ───────────────────────────────────────────── */
+function UltraGuaranteeSection() {
+  const { ref, inView } = useInView(0.1)
+  return (
+    <section ref={ref} className="relative py-20 md:py-28 px-4 overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#39FF14]/[0.02] rounded-full blur-[150px] pointer-events-none" />
+      <div className="relative max-w-4xl mx-auto">
+        <div className="text-center mb-12">
+          <motion.span initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5 }} className="inline-block text-[#39FF14] text-xs font-bold tracking-[0.25em] uppercase mb-4">Garantía total</motion.span>
+          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.1 }} className="text-3xl md:text-5xl font-extrabold">
+            Compra con <span className="bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">total confianza</span>
+          </motion.h2>
+          <motion.p initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.2 }} className="mt-3 text-white/35 text-sm md:text-base max-w-lg mx-auto">
+            Tu seguridad es nuestra prioridad. Cada producto está respaldado por certificaciones oficiales y miles de clientes satisfechos.
+          </motion.p>
+        </div>
+
+        {/* INVIMA Certification */}
+        <motion.div initial={{ opacity: 0, y: 30 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.7, delay: 0.3 }} className="relative bg-gradient-to-br from-[#39FF14]/[0.06] via-[#39FF14]/[0.02] to-transparent border border-[#39FF14]/20 rounded-3xl p-6 md:p-8 mb-8 overflow-hidden">
+          <div className="absolute top-0 right-0 w-40 h-40 bg-[#39FF14]/[0.04] rounded-full blur-[60px] pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-32 h-32 bg-[#39FF14]/[0.03] rounded-full blur-[50px] pointer-events-none" />
+          <div className="relative flex flex-col md:flex-row items-center gap-6 md:gap-8">
+            <div className="flex-shrink-0 text-center">
+              <div className="relative">
+                <div className="w-24 h-24 md:w-28 md:h-28 rounded-full bg-[#39FF14]/10 border-2 border-[#39FF14]/30 flex items-center justify-center mx-auto">
+                  <ShieldCheck className="w-10 h-10 md:w-12 md:h-12 text-[#39FF14]" />
+                </div>
+                <div className="absolute -inset-3 rounded-full border border-[#39FF14]/10 animate-[spin_20s_linear_infinite]" />
+                <div className="absolute -inset-6 rounded-full border border-dashed border-[#39FF14]/5 animate-[spin_30s_linear_infinite_reverse]" />
+              </div>
+              <p className="mt-3 text-[#39FF14] text-xs font-bold tracking-widest uppercase">INVIMA</p>
+            </div>
+            <div className="text-center md:text-left flex-1">
+              <h3 className="text-xl md:text-2xl font-extrabold text-white mb-2">
+                Registro INVIMA <span className="text-[#39FF14]">Oficial</span>
+              </h3>
+              <p className="text-white/50 text-sm leading-relaxed mb-4">
+                ColiPlus cuenta con <span className="text-white/80 font-semibold">Registro Sanitario INVIMA</span>, lo que garantiza que el producto ha sido evaluado y aprobado por el Instituto Nacional de Vigilancia de Medicamentos y Alimentos de Colombia. Esto significa:
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {[
+                  { icon: ShieldCheck, text: 'Inocuidad alimentaria comprobada' },
+                  { icon: BadgeCheck, text: 'Buenas Prácticas de Manufactura' },
+                  { icon: Award, text: 'Control de calidad riguroso' },
+                  { icon: Leaf, text: 'Ingredientes verificados y seguros' },
+                ].map((item, i) => (
+                  <div key={i} className="flex items-center gap-2 text-white/60 text-xs">
+                    <item.icon className="w-3.5 h-3.5 text-[#39FF14] flex-shrink-0" />
+                    <span>{item.text}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Guarantee pillars */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.5 }} className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mb-8">
+          {[
+            { icon: Truck, title: 'Recibe primero, paga después', desc: 'Pago contra entrega en toda Colombia. Solo pagas cuando tienes el producto en tus manos. Sin riesgo.' },
+            { icon: ShieldCheck, title: '100% Natural y Certificado', desc: 'Producto con Registro INVIMA vigente. Fórmula natural, sin químicos añadidos, sin gluten, sin lactosa.' },
+            { icon: Heart, title: '+5.000 clientes satisfechos', desc: 'Miles de colombianos ya transformaron su salud digestiva. Únete a la comunidad ColiPlus.' },
+          ].map((item, i) => (
+            <div key={i} className="bg-white/[0.03] border border-white/[0.06] rounded-2xl p-5 md:p-6 hover:border-[#39FF14]/15 transition-colors duration-300">
+              <div className="w-12 h-12 rounded-full bg-[#39FF14]/10 flex items-center justify-center mb-4">
+                <item.icon className="w-6 h-6 text-[#39FF14]" />
+              </div>
+              <h4 className="text-white font-bold text-sm md:text-base mb-2">{item.title}</h4>
+              <p className="text-white/40 text-xs md:text-sm leading-relaxed">{item.desc}</p>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Real testimonial screenshots showcase */}
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.7 }} className="bg-white/[0.02] border border-white/[0.05] rounded-3xl p-5 md:p-7">
+          <div className="flex items-center gap-2 mb-5">
+            <BadgeCheck className="w-4 h-4 text-[#39FF14]" />
+            <span className="text-white/50 text-xs font-bold tracking-wider uppercase">Reseñas verificadas de clientes reales</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {[
+              { src: '/images/testimonio-3.jpg', name: 'Gustavo A.' },
+              { src: '/images/testimonio-2.jpg', name: 'María Isabel' },
+              { src: '/images/testimonio-4.jpg', name: 'Juan Gabriel' },
+              { src: '/images/testimonio-1.jpg', name: 'Licencia S.' },
+            ].map((img, i) => (
+              <div key={i} className="relative group">
+                <img src={img.src} alt={`Reseña verificada de ${img.name}`} className="w-full rounded-xl border border-white/[0.06] group-hover:border-[#39FF14]/20 transition-colors duration-300" loading="lazy" />
+                <div className="absolute bottom-2 left-2 px-2 py-0.5 bg-black/60 rounded-md backdrop-blur-sm">
+                  <span className="text-white/60 text-[9px] font-medium">{img.name}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </motion.div>
       </div>
     </section>
   )
@@ -677,7 +813,16 @@ function FinalCTASection({ openWhatsApp }: { openWhatsApp: () => void }) {
         </motion.div>
         <motion.div initial={{ opacity: 0 }} animate={inView ? { opacity: 1 } : {}} transition={{ duration: 0.5, delay: 0.3 }} className="mb-8">
           <span className="text-2xl md:text-4xl font-black bg-gradient-to-r from-[#39FF14] to-[#5fff47] bg-clip-text text-transparent">$151.800</span>
-          <span className="text-white/30 text-sm ml-2">COP · 3 tarros de 450g</span>
+          <span className="text-white/30 text-sm ml-2">COP · Paga 2 Lleva 3</span>
+          <div className="mt-2 flex flex-wrap items-center justify-center gap-3 text-white/25 text-xs">
+            <span>1 und: $75.900</span>
+            <span>·</span>
+            <span>2 und: $113.850</span>
+            <span>·</span>
+            <span className="text-[#39FF14]/50 font-semibold">2x3: $151.800</span>
+            <span>·</span>
+            <span>3x5: $227.700</span>
+          </div>
         </motion.div>
         <motion.div initial={{ opacity: 0, y: 20 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6, delay: 0.4 }} className="flex flex-col sm:flex-row items-center justify-center gap-4">
           <GlowButton onClick={openWhatsApp} className="shadow-[0_0_60px_rgba(57,255,20,0.2)]">
